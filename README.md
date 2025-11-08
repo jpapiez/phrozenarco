@@ -2,6 +2,12 @@
 AddOns, hints, tips and tricks for the Phrozen Arco FDM printer
 
 ## config/AddOn.cfg
+- ☑️ Added _USER_CONFIG section to store user preferences for some functions
+- ☑️ Added [delayed_gcode Lights_On_Startup] to turn lights on with machine (optional)
+- ☑️ Added option to turn beep on startup on/off
+- ☑️ Added  [gcode_macro M601] to support Orca's pause on layer change (with optional beep notification)
+
+## config/AddOn.cfg
 Functions 💥:
 - ☑️ Added [respond] & [exclude_object] for console outputs and ORCA part selection :c
 - ☑️ Added an startup beep using the integrated beeper 🎵
