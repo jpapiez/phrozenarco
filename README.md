@@ -6,6 +6,7 @@ AddOns, hints, tips and tricks for the Phrozen Arco FDM printer
 - ☑️ Added [delayed_gcode Lights_On_Startup] to turn lights on with machine (optional)
 - ☑️ Added option to turn beep on startup on/off
 - ☑️ Added  [gcode_macro M601] to support Orca's pause on layer change (with optional beep notification)
+- ☑️ Added  CPU Temperature display. Important to monitor if you are adjusting main fan speed.
 
 ## config/AddOn.cfg
 Functions 💥:
