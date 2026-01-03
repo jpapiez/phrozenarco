@@ -19,10 +19,10 @@ Functions 💥:
 - ☑️ Added Adaptive Mesh with individual number of meshing points depending on object size (⚠️ needs Orca Adjustments)📐
 - ☑️ Added Light Toggle switch for Mainsail (🫶 thanks to Jay S. and Edwin T.) 💡
 - ☑️ 🔥Added filament change (M600) support. After executing M600 it automatically retracts out the filament. Take out the old filament and put the new filament in. Press [resume](https://github.com/user-attachments/assets/94c5e294-aff2-47f3-8124-f709c646ad53) in Mainsail Dashboard and wait until it loads the filament (need to push it little  bit until you feel its taken it). Press again [resume](https://github.com/user-attachments/assets/94c5e294-aff2-47f3-8124-f709c646ad53) and it should proceed printing with the new filament :). ⚠️There is only interaction over the Mainsail Dashboard possible. The LCD does not support this function (at least Im not aware of how it would be triggered).
- - ... new feature will be added soon here
+- ☑️ 🔥Added custom toolchange macros (PG101, ORCA_PURGE, safe pathing) for improved multi-material printing. See setup instructions below.
 
 Instructions📑:
-1. Upload it into the Klipper config folder (same 📁 where printer.cfg is located) 
+1. Upload it into the Klipper config folder (same 📁 where printer.cfg is located)
 2. In printer.cfg add on top the line: [include AddOn.cfg]
 3. In printer.cfg put # in front of the old mainboard fan control section ([CLICK HERE TO SEE THE EDITED VERSION](https://github.com/user-attachments/assets/8166b5c8-1e5e-40b5-8dd1-d662d7d2ea1b))
 
@@ -31,11 +31,41 @@ Instructions📑:
 Functions 💥:
 - ☑️ Added adaptive bed meshing to Orca
 - ☑️ Added Layer Info to Orca for showing Layer numbers in Mainsail
+- ☑️ Added Change Filament G-code for multi-material printing with Z-Sandwich pattern
 
 Instructions📑:
 1. Copy the code snippets for Start G-code from the file in Orca under Printer Settings--Machine G-code--[Machine Start G-Code](https://github.com/user-attachments/assets/56eb1a2b-4e3b-472f-a754-c0f7bf5e4327)
 2. Change Values for adaptive bed mesh under Printer Settings--[Basic Information](https://github.com/user-attachments/assets/5b15faf3-d276-43f8-820f-73795828afc5)
 3. Copy the code snippets for Layer change G-code from the file in Orca under Printer Settings--Machine G-code--[Layer Change Gcode](https://github.com/user-attachments/assets/1b46c960-d7ca-45a8-9369-41161494569d)
+
+
+## Custom Toolchange Macros (Multi-Material)
+
+Functions 💥:
+- ☑️ Smart Pre-Cut sequence (PG101) with configurable extra cuts
+- ☑️ ORCA_PURGE macro with poop splitting for large flush volumes
+- ☑️ Safe pathing to avoid danger zones and proper chute/wiper entry
+- ☑️ Improved cooling with stock-matched fan speeds and dwell times
+
+Setup Instructions📑:
+
+**Step 1: Configure in AddOn.cfg**
+
+In the `_USER_CONFIG` section of AddOn.cfg:
+
+```ini
+variable_extra_toolchange_cuts: 2     # extra cuts before firmware cut (0-3)
+variable_initial_purge_length: 200    # mm to purge on initial load
+variable_max_poop_size: 115           # max mm per poop (splits larger purges)
+```
+
+**Step 2: Update Slicer Change Filament G-code**
+
+1. Open Orca Slicer
+2. Go to Printer Settings → Machine G-code → Change filament G-code
+3. Paste the code from `config/Orca_Gcode.md` (Change Filament G-Code section)
+
+The slicer G-code uses a "Z-Sandwich" pattern: it lifts Z at the start, keeps it lifted through the entire toolchange process, and restores it at the end.
 
 
 ## config/printer.cfg
@@ -49,20 +79,20 @@ I use for myself a hold current of around 60% for x and y. The z axis is running
 Instructions📑:
 1. Open printer.cfg in config 📁 (easiest way is in mainsail over machine and clicking on printer.cfg)
 2. Add hold_current under [tmc5160 stepper_x],[tmc5160 stepper_y],[tmc2209 stepper_z],[tmc2209 stepper_z1]and optionally under [tmc2209 extruder]
-   ⚠️[Example here](https://github.com/user-attachments/assets/8352638e-08a7-4158-9276-61496bce998a) 
+   ⚠️[Example here](https://github.com/user-attachments/assets/8352638e-08a7-4158-9276-61496bce998a)
 3. Click save & restart ... done 🏁
 
 
 ## Mainsail: sorting macros
 Functions 💥:
 - ☑️ Optimizing macro section in the Mainsail Dashboard
-  
-Description📑:  
+
+Description📑:
 Under the following link is a nice explanation for managing the G-code macros in the dashboard [LINK](https://docs.mainsail.xyz/overview/settings/macros)<br>
 This helps to tidy up the dashboard view 🧹
 
 
- ## Hardware Z-Rod Mod 
+ ## Hardware Z-Rod Mod
 Functions 💥:
 - ☑️ Smoother Gantry movement on Z-axis
 
@@ -76,7 +106,7 @@ Here is the link with the files and some more informations [CLICK](https://www.p
 <br/>
 
 > [!CAUTION]
-> 
+>
 > Disclaimer:
 >Working with electricity and electronic components can be dangerous. Always ensure you take the necessary safety precautions when handling electrical devices.
 >
