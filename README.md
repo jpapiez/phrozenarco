@@ -1,115 +1,105 @@
-# PhrozenArco
-AddOns, hints, tips and tricks for the Phrozen Arco FDM printer
+# Phrozen Arco – Klipper Add-On System (KAOS)
+## Purpose
 
-## config/AddOn.cfg
-- ☑️ Added _USER_CONFIG section to store user preferences for some functions
-- ☑️ Added [delayed_gcode Lights_On_Startup] to turn lights on with machine (optional)
-- ☑️ Added option to turn beep on startup on/off
-- ☑️ Added  [gcode_macro M601] to support Orca's pause on layer change (with optional beep notification)
-- ☑️ Added  CPU Temperature display. Important to monitor if you are adjusting main board fan speed.
+This repository implements a centralized,  Klipper add-on system built around a single configuration file:
+addon.cfg
 
-## config/AddOn.cfg
-Functions 💥:
-- ☑️ Added [respond] & [exclude_object] for console outputs and ORCA part selection :c
-- ☑️ Added an startup beep using the integrated beeper 🎵
-- ☑️ Added PID control for more quiet board fan operation (🫶 thanks to [eknofsky](https://github.com/eknofsky)) 🎧 ⚠️[need to comment out the old fan control section in printer.cfg](https://github.com/user-attachments/assets/8166b5c8-1e5e-40b5-8dd1-d662d7d2ea1b)
-- ☑️ Added Screws_Tilt_Adjust functionality to get instructions for leveling the bed (triggered in console using screws_tilt_calculate) 🪛
-- ☑️ Added Z_Tilt_Adjust for levelling the left and right Z-Axis (triggered by entering Z_Tilt_Adjust in console or click the [small icon](https://github.com/user-attachments/assets/8f263903-70f9-4fa7-9d32-b4b9a3c52ba4) aside of homing in mainsail) 📏
-- ☑️ Added for Screws_Tilt_Adjust and Z-Tilt_Adjust a homing first before performing the action to avoid scratching the bed under unhomed condition 🏠
-- ☑️ Added Adaptive Mesh with individual number of meshing points depending on object size (⚠️ needs Orca Adjustments)📐
-- ☑️ Added Light Toggle switch for Mainsail (🫶 thanks to Jay S. and Edwin T.) 💡
-- ☑️ 🔥Added filament change (M600) support. After executing M600 it automatically retracts out the filament. Take out the old filament and put the new filament in. Press [resume](https://github.com/user-attachments/assets/94c5e294-aff2-47f3-8124-f709c646ad53) in Mainsail Dashboard and wait until it loads the filament (need to push it little  bit until you feel its taken it). Press again [resume](https://github.com/user-attachments/assets/94c5e294-aff2-47f3-8124-f709c646ad53) and it should proceed printing with the new filament :). ⚠️There is only interaction over the Mainsail Dashboard possible. The LCD does not support this function (at least Im not aware of how it would be triggered).
-- ☑️ 🔥Added custom toolchange macros (PG101, ORCA_PURGE, safe pathing) for improved multi-material printing. See setup instructions below.
+The goal is to:
+- Provide one authoritative config file for enabling/disabling features
+- Avoid editing multiple .cfg files when tuning or experimenting
+- Allow clean inclusion or exclusion of optional mods
+- Make behavior predictable, debuggable, and reversible
 
-Instructions📑:
-1. Upload it into the Klipper config folder (same 📁 where printer.cfg is located)
-2. In printer.cfg add on top the line: [include AddOn.cfg]
-3. In printer.cfg put # in front of the old mainboard fan control section ([CLICK HERE TO SEE THE EDITED VERSION](https://github.com/user-attachments/assets/8166b5c8-1e5e-40b5-8dd1-d662d7d2ea1b))
+If a feature exists, it should be:
+- Declared
+- Enabled or disabled
+- Configured
+…from addon.cfg.
+
+## Instructions📑:
+Installation intructions can be found in the [config/README.md](config/README.md) file in the [config directory](config/)
+
+# Features/Functions
 
 
-## config/Orca_Gcode.md
-Functions 💥:
-- ☑️ Added adaptive bed meshing to Orca
-- ☑️ Added Layer Info to Orca for showing Layer numbers in Mainsail
-- ☑️ Added Change Filament G-code for multi-material printing with Z-Sandwich pattern
+## Configuration & Core Infrastructure
+Acts as a central settings area where you can turn features on or off and adjust how different parts of the system behave, all from one place.
+- `_USER_CONFIG` — central configuration / policy macro support  
+- Static include: `magic_ams_by_chris.cfg` — AMS / purge subsystem  
 
-Instructions📑:
-1. Copy the code snippets for Start G-code from the file in Orca under Printer Settings--Machine G-code--[Machine Start G-Code](https://github.com/user-attachments/assets/56eb1a2b-4e3b-472f-a754-c0f7bf5e4327)
-2. Change Values for adaptive bed mesh under Printer Settings--[Basic Information](https://github.com/user-attachments/assets/5b15faf3-d276-43f8-820f-73795828afc5)
-3. Copy the code snippets for Layer change G-code from the file in Orca under Printer Settings--Machine G-code--[Layer Change Gcode](https://github.com/user-attachments/assets/1b46c960-d7ca-45a8-9369-41161494569d)
+## AMS / Multi-Material Control
+- `apply_transit_override` — adjusts internal waiting-area position used during service moves  
+- `PG101` — smart pre-cut routine with optional extra cuts before firmware toolchange  
+- `ORCA_PURGE` — main color-change purge routine used by Orca Slicer  
+- `PRZ_SPITTING_START` — fixed-length priming of new filament after toolchange  
+- `PRZ_SPITTING_NORMAL` — disabled stock purge step (handled by ORCA_PURGE instead)  
+- `PRZ_SPITTING_END` — disabled stock temp-restore step (handled by ORCA_PURGE instead)  
+- `_SAFE_SERVICE_TRANSIT` — shared safe movement logic for service and purge areas  
+- `PRZ_WAITINGAREA` — moves toolhead to safe waiting position  
+- `PRZ_CUT_WAITINGAREA` — moves toolhead safely to cutter / chute area  
+- `PRZ_PAUSE_WAITINGAREA` — safe pause position away from the print  
+- `PRZ_WIPEMOUTH` — multi-lane nozzle wipe routine for even wear on wiper  
+- `PRINT_END` override — adds optional extra cuts before final firmware retract and shutdown  
 
+## Cooling & Fan Control
+Automatically manages the mainboard fan to keep the printer electronics cool while reducing unnecessary fan noise. The system uses temperature readings to decide when the fan should run faster or slower.
+- `temperature_sensor cpu_temp` — host CPU temperature  
+- `temperature_fan board_fan` — MCU-temp watermark fan control  
+- `apply_board_fan_target` — startup application of `_USER_CONFIG.board_fan_target`  
+- `BOARD_FAN_CPU_OVERRIDE` — CPU-based override state machine  
+- `BOARD_FAN_CPU_LOOP` — periodic CPU/fan evaluation loop  
 
-## Custom Toolchange Macros (Multi-Material)
+## Lighting Control
+Controls the printer’s lights at startup and during normal use, allowing automatic lighting and easy manual toggling from the UI.
+- `TURN_ON_LIGHT_AT_BOOT` — startup light routine  
+- `LIGHTS_OFF_DELAY` — delayed light-off routine  
+- `Lights_On` / `Lights_Off` / `Lights_Toggle` — UI-integrated light macros  
 
-Functions 💥:
-- ☑️ Smart Pre-Cut sequence (PG101) with configurable extra cuts
-- ☑️ ORCA_PURGE macro with poop splitting for large flush volumes
-- ☑️ Safe pathing to avoid danger zones and proper chute/wiper entry
-- ☑️ Improved cooling with stock-matched fan speeds and dwell times
+## Sound & Notifications
+Provides simple beep sounds for startup and notifications so you can hear when certain events happen.
+- `[output_pin beeper]` — buzzer pin definition  
+- `startup_beep` — startup beep routine gated by `_USER_CONFIG.enable_startup_beep`  
+- `Beep_Notify` — general-purpose notification tone macro  
 
-Setup Instructions📑:
+## Core Behavior Overrides (Replace Stock Logic)
+Changes a few built-in printer behaviors to make them safer and more reliable, especially for homing and bed mesh calibration.
+- `PG28` — stateful homing wrapper replacing stock behavior  
+- `PG28_CLEAR_HAS_RUN` — reset PG28 run-state  
+- `G30` override — removes `BED_MESH_PROFILE LOAD=default` behavior  
 
-**Step 1: Configure in AddOn.cfg**
+## Bed Leveling & Mesh Routines
+Helps guide manual bed leveling and automatically adjusts how detailed bed probing is based on the size of your print.
+- `SCREWS_TILT_CALCULATE` wrapper — homes then runs screws tilt  
+- `[screws_tilt_adjust]` — bed screw geometry / leveling config  
+- `BED_MESH_CALIBRATE_CUSTOM` — adaptive probe-count mesh calibration wrapper  
 
-In the `_USER_CONFIG` section of AddOn.cfg:
+## Gantry Tramming (Dual Z Tilt)
+Keeps the printer’s gantry level by automatically aligning both Z motors, while avoiding unnecessary repeat leveling.
+- `Z_TILT_ADJUST` wrapper — homes if needed, then calls base tilt  
+- `Z_TILT_ONCE` — run-once tramming logic with optional force  
+- `Z_TILT_CLEAR` — clears the run-once flag  
+- `[z_tilt]` — dual-Z geometry definition  
 
-```ini
-variable_extra_toolchange_cuts: 2     # extra cuts before firmware cut (0-3)
-variable_initial_purge_length: 200    # mm to purge on initial load
-variable_max_poop_size: 115           # max mm per poop (splits larger purges)
-```
+## Motion Control (Dynamic Speed by Z Height)
+Automatically slows the printer down on tall or narrow prints to reduce wobble, ringing, and print failures.
+- `DYNAMIC_SPEED` — state holder  
+- `DYNAMIC_SPEED_ENABLE` — enable + capture base accel  
+- `DYNAMIC_SPEED_DISABLE` — disable + restore captured accel  
+- `DYNAMIC_SPEED_LOOP` — periodic Z-band evaluation and application  
 
-**Step 2: Update Slicer Change Filament G-code**
-
-1. Open Orca Slicer
-2. Go to Printer Settings → Machine G-code → Change filament G-code
-3. Paste the code from `config/Orca_Gcode.md` (Change Filament G-Code section)
-
-The slicer G-code uses a "Z-Sandwich" pattern: it lifts Z at the start, keeps it lifted through the entire toolchange process, and restores it at the end.
-
-
-## config/printer.cfg
-Functions 💥:
-- ☑️ Setting the value hold_current
-
-Description📑:
-Adding hold_current to the x,y and z steppers has main benefits of reducing stepper motor heat and power consumption during idle periods, especially for motors that remain stationary for longer durations. This can help improve component longevity and reduce thermal stress. Setting it for x and y in an range of 50-70% of run_current can support smoother printing. The Arco has for the high speeds a pretty high current set and this can cause small vibrations on idle. A lower hold_current reduces this possible vibrations. For the z axis its beneficial to set it on the same value like run_current. A lower hold_current can cause one or both sides unevenly sinking down a bit on idle.
-I use for myself a hold current of around 60% for x and y. The z axis is running on 0.9 both and optionally you can set a value of 0.5 to the extruder.
-
-Instructions📑:
-1. Open printer.cfg in config 📁 (easiest way is in mainsail over machine and clicking on printer.cfg)
-2. Add hold_current under [tmc5160 stepper_x],[tmc5160 stepper_y],[tmc2209 stepper_z],[tmc2209 stepper_z1]and optionally under [tmc2209 extruder]
-   ⚠️[Example here](https://github.com/user-attachments/assets/8352638e-08a7-4158-9276-61496bce998a)
-3. Click save & restart ... done 🏁
-
-
-## Mainsail: sorting macros
-Functions 💥:
-- ☑️ Optimizing macro section in the Mainsail Dashboard
-
-Description📑:
-Under the following link is a nice explanation for managing the G-code macros in the dashboard [LINK](https://docs.mainsail.xyz/overview/settings/macros)<br>
-This helps to tidy up the dashboard view 🧹
-
-
- ## Hardware Z-Rod Mod
-Functions 💥:
-- ☑️ Smoother Gantry movement on Z-axis
-
-Description📑:
-The Arco has by default on top and bottom ball bearings which guide the z-rods. This design can cause z-banding. The effect gets stronger the more the z-rods are bend. If you are actually good with the print quality---keep the machine stock. I would just recommend you to do this modification as a more experienced user and if you experience z-banding issues.
-Other than that I can just say a big 🫶 thanks to Joost v.d.L. for redesigning the top caps and managing how to fight the z-banding.
-Here is the link with the files and some more informations [CLICK](https://www.printables.com/model/1428999-phrozen-arco-z-lead-screw-flexing-top-cap-set)🔥
+## Stepper Thermal / Idle Management
+Reduces motor heat and noise when the motor is idle to help protect components and keep the printer quieter.
+- `apply_hold_current` — startup routine to set HOLDCURRENT values  
 
 
+## Disclaimer
 
-<br/>
+This configuration modifies stock Phrozen Arco Klipper behavior.
 
-> [!CAUTION]
->
-> Disclaimer:
->Working with electricity and electronic components can be dangerous. Always ensure you take the necessary safety precautions when handling electrical devices.
->
->This software and associated documentation are provided "as is" without warranty of any kind, either express or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of >contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
->
->Use this software at your own risk. The authors are not responsible for any damage to your equipment, personal injury, or any other consequences resulting from the use of this software.
+- These settings have been tested on our own machines
+- Your printer, hardware, and setup may differ
+- Results may vary (YMMV)
+- Use at your own risk
+- No warranty is provided
+
+Always keep a backup of your working configuration before making changes.
