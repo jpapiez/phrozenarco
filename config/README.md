@@ -115,21 +115,24 @@ Replace your **Start G-code** with:
 ; machine start g-code with adaptive bed mesh (explicit profile management)
 M107 ; turn off part cooling fan
 G90 ; absolute positioning
+
 M140 S[first_layer_bed_temperature] ; set bed to final temperature
 M104 S140 ; set hotend to probing temperature
 M190 S[first_layer_bed_temperature] ; wait for bed to reach final temperature
 M109 S140 ; wait for hotend to reach probing temperature
+
 PG28 ; home all axes
 Z_TILT_ONCE ; run tramming once per session
 PRZ_WIPEMOUTH ; wipe nozzle
-M106 S255 ; turn on part cooling fan for probing
 BED_MESH_CLEAR ; clear any active mesh profile first
 BED_MESH_CALIBRATE mesh_min={adaptive_bed_mesh_min[0]},{adaptive_bed_mesh_min[1]} mesh_max={adaptive_bed_mesh_max[0]},{adaptive_bed_mesh_max[1]} ALGORITHM=[bed_mesh_algo] PROBE_COUNT={bed_mesh_probe_count[0]},{bed_mesh_probe_count[1]} ADAPTIVE=0 ADAPTIVE_MARGIN=0
+
 TP_OUT ; disable PG28/G30/G31 to prevent mid-print homing
 PRZ_WAITINGAREA ; move to waiting area
-M106 S0 ; turn off part cooling fan
+
 G21 ; set units to millimeters
 M83 ; extruder relative mode
+
 M109 S{first_layer_temperature[0]} ; heat to final printing temperature
 P0 M1
 P28
