@@ -10,7 +10,7 @@ Thanks to [Steve Cotter](https://www.facebook.com/steve.cotter.3701) for the fir
 
 ### 1) Install (USB Update)
 
-1. Copy the 'phrozen_dev' file from the `.zip` to a USB drive
+1. Copy the 'phrozen_dev' file from the [`.zip`](https://gitlab.com/sanders.chris/phrozenarco/-/blob/91e69683c66df90157a7d4afc7943fc48b63a57f/English%20Translation/Firmware%20Update/Arco_FW_V199_EN.zip) to a USB drive
 2. Insert USB into the printer
 3. On the Arco screen:
 
