@@ -2,6 +2,8 @@
 
 Clean English translation and improved logging for the Phrozen Arco AMS (multi-material) Python layer.
 
+Thanks to [Steve Cotter](https://www.facebook.com/steve.cotter.3701) for the first version of the translation and getting me going on this!
+
 ---
 
 ## Quick Start
