@@ -8,20 +8,20 @@ Clean English translation and improved logging for the Phrozen Arco AMS (multi-m
 
 ### 1) Install (USB Update)
 
-1. Copy the release `.zip` to a USB drive
+1. Copy the 'phrozen_dev' file from the `.zip` to a USB drive
 2. Insert USB into the printer
 3. On the Arco screen:
 
    * Tap the **Info (ⓘ) icon**
-   * Go to **Firmware Update**
+   * Go to **Update**
    * Select **USB Update**
 4. Let the update complete
 
 The installer will:
 
 * back up existing files (`.bak`, then timestamped on repeats)
-* install `dev.py`, `cmds.py`
-* optionally install `custom_prz_logging.cfg`
+* install updated `dev.py`, `cmds.py`
+* install `custom_prz_logging.cfg`
 
 ---
 
