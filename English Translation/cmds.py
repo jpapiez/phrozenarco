@@ -22,22 +22,22 @@ from .base import *
 from ctypes import *
 
 
-# （2）Python class up can use use use, because is to class and to, code show down show :
-# class item:
-#     def __init__(self):
-#         self.name = ''
-#         self.size = 10
-#         self.list = []
-# from up show can output class is full, in class change variable, change variable is class 。 and and change variable number data class type is 、 number and list table, normal is number data class type 。
+# (2)Python class up can use use use, because is to class and to, code show down show :
+# class item:
+#     def __init__(self):
+#         self.name = ''
+#         self.size = 10
+#         self.list = []
+# from up show can output class is full, in class change variable, change variable is class . and and change variable number data class type is , number and list table, normal is number data class type .
 # class can number value set has and action use to, code show down show :
-# a = item()
-# a.name = 'cup'
-# a.size = 8
+# a = item()
+# a.name = 'cup'
+# a.size = 8
 # a.list.append('water')
 
 
 # number
-# in C canstruct class type, data internal empty, use internal, because therefore can address number 。 and C, in NumPy to number action 。 to NumPy and C, NumPycan address readC number number data, switch is NumPy number 。need to number, hasname, age and salary。 in NumPy can down :
+# in C canstruct class type, data internal empty, use internal, because therefore can address number . and C, in NumPy to number action . to NumPy and C, NumPycan address readC number number data, switch is NumPy number .need to number, hasname, age and salary. in NumPy can down :
 # import numpy as np
 # MyType=np.dtype({
 #     'names':['name','age','salary'],
@@ -45,7 +45,7 @@ from ctypes import *
 # })
 # a=np.array([("tang",23,130.2),("wang",22,100.2)],
 # dtype=MyType)
-# # or Data=np.array([(‘zero’,0.,0.)]*10,dtype=MyType) #createData[2]
+# # or Data=np.array([('zero',0.,0.)]*10,dtype=MyType) #createData[2]
 # #Date[0]['name']="tang"
 
 # in Python use use c_typewhen output little-endian
@@ -62,8 +62,8 @@ from ctypes import *
 #                 ('type', c_ubyte),
 #                 ('data1', c_int),
 #                 ('data2', c_short)]
-# c_short is 2, c_ubyte is 1, c_int is 4。but is number data, switch is byte streamafterdetected, is use little-endian。, command value if is 1000, switch 2hex number is 0x03E8, byte stream input output is 0xE803。
-# : set class StructureBigEndianStructure。
+# c_short is 2, c_ubyte is 1, c_int is 4.but is number data, switch is byte streamafterdetected, is use little-endian., command value if is 1000, switch 2hex number is 0x03E8, byte stream input output is 0xE803.
+# : set class StructureBigEndianStructure.
 
 
 # union in internal has internal empty, emptyunion number data class type, union in initializewhen, union value, after has parameter number
@@ -142,7 +142,7 @@ from ctypes import *
 #     uint8_t InfoFlag;
 # // current ID
 #     int CurrentDeviceId;
-# // after ID, has？ unit network
+# // after ID, has? unit network
 #     int EndDeviceId;
 # // mode(multi-materialmode: 00 refillmode: 01)
 #     uint8_t DeviceMode;
@@ -182,11 +182,11 @@ class AMSSimpleInfoBytes(Union):# multi-materialmainboardstate
 #     uint8_t InfoFlag;
 # // current ID
 #     int8_t CurrentDeviceId;
-# // after ID, has？ unit network
+# // after ID, has? unit network
 #     int8_t EndDeviceId;
-# // move ID, #？ unit is current move
+# // move ID, #? unit is current move
 #     int8_t ActiveDeviceId;
-# // project ID, #？ unit is need toto
+# // project ID, #? unit is need toto
 #     int8_t TargetDeviceId;
 # // (use keep reserve)
 #     uint8_t Others;
@@ -284,25 +284,25 @@ class Commands(Base):
         # AMS action mode
         self.G_AMSDeviceWorkMode = AMS_WORK_MODE_UNKNOW  # default action modeUnknown mode
 
-        # 1、python () table show, is change sequence list
-        # 1）create: tuple = (1,2,3) get number data tuple[0]...... tuple[0,2].....tuple[1,2]......
+        # 1,python () table show, is change sequence list
+        # 1)create: tuple = (1,2,3) get number data tuple[0]...... tuple[0,2].....tuple[1,2]......
         # 2)modify: is modify
-        # 3）delete del tuple
-        # 4） internal set number :
-        # cmp（tuple1, tuple2）: compare
+        # 3)delete del tuple
+        # 4) internal set number :
+        # cmp(tuple1, tuple2): compare
         # len(tuple):length
-        # max（tuple）: value
-        # min（tuple）: value
-        # tuple（seq）: set list table switch is
-        # 2、python [] table show list table, list table is change sequence list
-        # 1）create list table l = [1,2,3,4] get number data l[0]........
+        # max(tuple): value
+        # min(tuple): value
+        # tuple(seq): set list table switch is
+        # 2,python [] table show list table, list table is change sequence list
+        # 1)create list table l = [1,2,3,4] get number data l[0]........
         # 2) list table modify
-        # 3） internal set number
-        # cmp（list1, list2）: compare
+        # 3) internal set number
+        # cmp(list1, list2): compare
         # len(list):length
-        # max（list）: value
-        # min（list）: value
-        # list（seq）: set switch is list table
+        # max(list): value
+        # min(list): value
+        # list(seq): set switch is list table
         # list.append(obj): in list table new to
         # list.pop(): move number data
         # list.remove: move list table # value
@@ -310,18 +310,18 @@ class Commands(Base):
         # list.reverse(): switch list table
         # list.count(bj): to in list table output time number
         # list.insert(index,obj) : in position to
-        # 3、python {}; is change device, use use compare
-        # 1）create: dict = {"a":1,"b":2}. is to : key, value value to get number data dict['a'],
-        # 2）modify
-        # 3）delete: del dict["a"] delete to number data del dict delete dict.clear()all project
-        # 4） internal set number
-        # cmp（dict1, dict2）: compare
+        # 3,python {}; is change device, use use compare
+        # 1)create: dict = {"a":1,"b":2}. is to : key, value value to get number data dict['a'],
+        # 2)modify
+        # 3)delete: del dict["a"] delete to number data del dict delete dict.clear()all project
+        # 4) internal set number
+        # cmp(dict1, dict2): compare
         # len(dict):length
         # dict.clear():delete number data
         # dict.get(key, default=None): value, ifnodefault value
         # dict.has_key(key): value is no exists, true, false
-        # dict.item（） list table value （, value ）
-        # dict.key（）allkey value
+        # dict.item() list table value (, value )
+        # dict.key()allkey value
 
         # python
         #P9 X190.290 Y238.700 W2.010 H11.200 D1
@@ -2232,7 +2232,7 @@ class Commands(Base):
             self.STM32ReprotPauseFlag=0
 
         else:
-            self.G_PhrozenFluiddRespondInfo("[INFO] single-color、single-color refill moderesume")
+            self.G_PhrozenFluiddRespondInfo("[INFO] single-color,single-color refill moderesume")
             # lancaigang240108: pausestate
             self.G_KlipperIfPaused = False
             # lancaigang240124: stm32 move report, canpause1 time
@@ -3688,7 +3688,7 @@ class Commands(Base):
         # lancaigang231201: checkcut filament after old channelfilament is no normal normal unload filament, normal normal then pause
         self.Cmds_CutFilaIfNormalCheck()
         # lancaigang240912: is pause, resumewhen will detectto is pause, will
-        # lancaigang250109:becausemulti-materialMCresumeneed tore feed。cannotpause
+        # lancaigang250109:becausemulti-materialMCresumeneed tore feed.cannotpause
         # if self.G_KlipperIfPaused == True:
         # self.G_PhrozenFluiddRespondInfo("[ERROR] [(cmds.python)]cut filament6toolheaddetectto filament, cutter error, please check cutter, pauseklipperprinting")
         #     #Lo_ChangeChannelIfSuccess = False
@@ -5711,7 +5711,7 @@ class Commands(Base):
                     # lancaigang231201: checkcut filament after old channelfilament is no normal normal unload filament, normal normal then pause
                     self.Cmds_CutFilaIfNormalCheck()
                     if self.G_KlipperIfPaused == True:
-                        self.G_PhrozenFluiddRespondInfo('[INFO] cut filament？toolheaddetectedfilament, cutter error, please check cutter, pauseklipperprinting')
+                        self.G_PhrozenFluiddRespondInfo('[INFO] cut filament?toolheaddetectedfilament, cutter error, please check cutter, pauseklipperprinting')
                         #Lo_ChangeChannelIfSuccess = False
                         return
                 # else:
@@ -5932,7 +5932,7 @@ class Commands(Base):
             # lancaigang231216: wait6check is no cut filamentsuccessful
             self.Cmds_CutFilaIfNormalCheck()
             if self.G_KlipperIfPaused == True:
-                self.G_PhrozenFluiddRespondInfo('[INFO] [(cmds.python)Cmds_P1CnAutoChangeChannel]cut filament？toolheaddetectedfilament, cutter error, please check cutter, pauseklipperprinting')
+                self.G_PhrozenFluiddRespondInfo('[INFO] [(cmds.python)Cmds_P1CnAutoChangeChannel]cut filament?toolheaddetectedfilament, cutter error, please check cutter, pauseklipperprinting')
                 #self.Cmds_PhrozenKlipperPause(None)
 
                 Lo_PauseStatus=self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -6186,8 +6186,8 @@ class Commands(Base):
                 # lancaigang250607: state; 1-unload filament; 2-feed; 3-; 4-pause
                 self.G_KlipperPrintStatus= 2
                 # Python enumerate() number
-                # enumerate() number use set number data to (list table 、 or) is sequence list, when list output number data and number data down, use in for 。
-                # Python 2.3. up version use, 2.6 add start parameter number 。
+                # enumerate() number use set number data to (list table , or) is sequence list, when list output number data and number data down, use in for .
+                # Python 2.3. up version use, 2.6 add start parameter number .
                 # for use use enumerate
                 # >>> seq = ['one', 'two', 'three']
                 # >>> for i, element in enumerate(seq):
@@ -8677,15 +8677,15 @@ class Commands(Base):
     # PRZ_VERSION version
     def Cmds_PhrozenVersion(self, gcmd):
         # ASCIIhas128 (up table), code ()from 0to 127(is from 0000 0000to 0111 1111,
-        # hex is from 0x00to 0x7F), is 0。 :
-        # 0~31: show or use, 0x07(BEL) will machine send output 、0x00(NULempty, is empty)
-        # normal use show 、0x0D(CR) and 0x0A(LF) use show machine head to first () and move to down ();
-        # : set use or or use is “”, up has, up “” table show is move action or is,
-        # because therefore show 。
+        # hex is from 0x00to 0x7F), is 0. :
+        # 0~31: show or use, 0x07(BEL) will machine send output ,0x00(NULempty, is empty)
+        # normal use show ,0x0D(CR) and 0x0A(LF) use show machine head to first () and move to down ();
+        # : set use or or use is "", up has, up "" table show is move action or is,
+        # because therefore show .
         # 32: show but empty;
         # 33~126: show, 48~57 is 0-9 number, 65~90 is 26 write text, 97~122 is 26 write text,
-        # is 、;
-        # 127: show DEL。
+        # is ,;
+        # 127: show DEL.
 
 
         self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_PhrozenVersion]command='%s'" % (gcmd.get_commandline(),))
@@ -8718,13 +8718,13 @@ class Commands(Base):
         self.Cmds_USBConnectErrorCheck()
         #lancaigang241031:
         if self.G_SerialPort1OpenFlag == True:
-            # lancaigang240524: readAMSmainboardversion、16HUBmainboardversion
+            # lancaigang240524: readAMSmainboardversion,16HUBmainboardversion
             self.Cmds_AMSSerial1Send("AT+SB=0")
-            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
         #lancaigang241030:
         if self.G_SerialPort2OpenFlag == True:
             self.Cmds_AMSSerial2Send("AT+SB=0")
-            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
 
         # lancaigang240529: phrozen file version
         self.G_PhrozenFluiddRespondInfo("V-H%s-I%s-F%s" % (HW_VERSION,IMAGE_VERSION,FW_VERSION))
@@ -9025,14 +9025,14 @@ class Commands(Base):
         self.Cmds_USBConnectErrorCheck()
         #lancaigang241031:
         if self.G_SerialPort1OpenFlag == True:
-            # lancaigang240524: readAMSmainboardversion、16HUBmainboardversion
+            # lancaigang240524: readAMSmainboardversion,16HUBmainboardversion
             self.Cmds_AMSSerial1Send("AT+SB=0")
-            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
         #lancaigang241030:
         if self.G_SerialPort2OpenFlag == True:
-            # lancaigang240524: readAMSmainboardversion、16HUBmainboardversion
+            # lancaigang240524: readAMSmainboardversion,16HUBmainboardversion
             self.Cmds_AMSSerial2Send("AT+SB=0")
-            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+            self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
 
 
         # lancaigang240529: phrozen file version
@@ -10509,7 +10509,7 @@ class Commands(Base):
 
         # lancaigang250607: state; 1-unload filament; 2-feed; 3-; 4-pause
         if self.G_KlipperPrintStatus == 3:
-            self.G_PhrozenFluiddRespondInfo('[INFO] printing, logical P28！！！')
+            self.G_PhrozenFluiddRespondInfo('[INFO] printing, logical P28!!!')
             return
 
         #lancaigang250724:Read image ID
@@ -10664,14 +10664,14 @@ class Commands(Base):
 
             #lancaigang241031:
             if self.G_SerialPort1OpenFlag == True:
-                # lancaigang240524: readAMSmainboardversion、16HUBmainboardversion
+                # lancaigang240524: readAMSmainboardversion,16HUBmainboardversion
                 self.Cmds_AMSSerial1Send("AT+SB=0")
-                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
             #lancaigang241030:
             if self.G_SerialPort2OpenFlag == True:
-                # lancaigang240524: readAMSmainboardversion、16HUBmainboardversion
+                # lancaigang240524: readAMSmainboardversion,16HUBmainboardversion
                 self.Cmds_AMSSerial2Send("AT+SB=0")
-                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
 
             self.G_PhrozenFluiddRespondInfo('[INFO] return')
             # 
@@ -10887,14 +10887,14 @@ class Commands(Base):
 
             #lancaigang241031:
             if self.G_SerialPort1OpenFlag == True:
-                # lancaigang240524: readAMSmainboardversion、16HUBmainboardversion
+                # lancaigang240524: readAMSmainboardversion,16HUBmainboardversion
                 self.Cmds_AMSSerial1Send("AT+SB=0")
-                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 1Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
             #lancaigang241030:
             if self.G_SerialPort2OpenFlag == True:
-                # lancaigang240524: readAMSmainboardversion、16HUBmainboardversion
+                # lancaigang240524: readAMSmainboardversion,16HUBmainboardversion
                 self.Cmds_AMSSerial2Send("AT+SB=0")
-                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard、16HUBmainboard')
+                self.G_PhrozenFluiddRespondInfo('[INFO] serial port 2Sending command: AT+SB=0; get AMSmainboard,16HUBmainboard')
 
         # if is 0, nosuccessfulopen serial port
         else:
@@ -11437,17 +11437,17 @@ class Commands(Base):
             self.G_DictChangeChannelWaitAreaParam["A"] = action
 
         # Python list table (List)
-        # sequence list is Python number data 。 sequence list number - position, or, # is 0, # is 1, therefore class 。
-        # Pythonhas6 sequence list internal set class type, but normal is list table and 。
-        # sequence list can action,, add,, check。
-        # therefore external, Pythonalready internal set sequence list length and and 。
-        # list table is normal use Python number data class type, can action is internal value output 。
+        # sequence list is Python number data . sequence list number - position, or, # is 0, # is 1, therefore class .
+        # Pythonhas6 sequence list internal set class type, but normal is list table and .
+        # sequence list can action,, add,, check.
+        # therefore external, Pythonalready internal set sequence list length and and .
+        # list table is normal use Python number data class type, can action is internal value output .
         # list table number data item need tohas class type
-        # create list table, to set number data item use use 。 down show :
+        # create list table, to set number data item use use . down show :
         # list1 = ['physics', 'chemistry', 1997, 2000]
         # list2 = [1, 2, 3, 4, 5 ]
         # list3 = ["a", "b", "c", "d"]
-        # and, list table from 0。 list table can get 、。
+        # and, list table from 0. list table can get ,.
         self.ChangeWaitMoveArea = []
         # defaultmm; cfg set or internal all default
         Lo_LineWidth = self.G_ChangeChannelWaitLineWidth  
