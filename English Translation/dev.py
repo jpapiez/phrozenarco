@@ -1265,7 +1265,7 @@ class PhrozenDev(Apis):
         # // lancaigang231202:+PAUSE:1,oldchannel,newchannel;1-new AMSdo not
         # // lancaigang231202:+PAUSE:2,oldchannel,newchannel;2-pauseACK
         # // lancaigang231204:+PAUSE:3,oldchannel,newchannel;3-
-        # // lancaigang231205:+PAUSE:4,oldchannel,newchannel;4-feedtimeout, pause(1、feed timeout60s; 2、feed)
+        # // lancaigang231205:+PAUSE:4,oldchannel,newchannel;4-feedtimeout, pause(1,feed timeout60s; 2,feed)
         # // lancaigang231205:+PAUSE:5,oldchannel,newchannel;5-
         # // lancaigang231205:+PAUSE:6,oldchannel,newchannel;6-entryto buffertimeout20s, pause
         # // lancaigang231205:+PAUSE:7,oldchannel,newchannel;7-bufferfullstatetimeout60s, pause(report error because : errorfull or toolheadfull or full)
