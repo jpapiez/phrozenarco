@@ -67,40 +67,40 @@ class PhrozenDev(Apis):
         parts.append(msg)
         return " ".join(parts)
 
-def _prz_filtered_respond_info(self, msg):
-    try:
-        text = str(msg).strip()
-
-        # Pass through anything that is not explicitly a log message.
-        # Phrozen/HMI uses RespondInfo for control messages too.
-        if not (
-            text.startswith("[INFO]") or
-            text.startswith("[WARN]") or
-            text.startswith("[ERROR]") or
-            text.startswith("[DEBUG]")
-        ):
+    def _prz_filtered_respond_info(self, msg):
+        try:
+            text = str(msg).strip()
+    
+            # Pass through anything that is not explicitly a log message.
+            # Phrozen/HMI uses RespondInfo for control messages too.
+            if not (
+                text.startswith("[INFO]") or
+                text.startswith("[WARN]") or
+                text.startswith("[ERROR]") or
+                text.startswith("[DEBUG]")
+            ):
+                self._prz_original_respond_info(msg)
+                return
+    
+            # Pass through log-wrapped protocol messages such as [INFO] +P114:2
+            if (
+                text.startswith("[INFO] +") or
+                text.startswith("[WARN] +") or
+                text.startswith("[ERROR] +") or
+                text.startswith("[DEBUG] +")
+            ):
+                self._prz_original_respond_info(msg)
+                return
+    
+            level, clean_msg = self._prz_parse_log_level(text)
+    
+            if self._prz_should_log(level):
+                self._prz_original_respond_info(
+                    self._prz_render_log(level, clean_msg)
+                )
+    
+        except Exception:
             self._prz_original_respond_info(msg)
-            return
-
-        # Pass through log-wrapped protocol messages such as [INFO] +P114:2
-        if (
-            text.startswith("[INFO] +") or
-            text.startswith("[WARN] +") or
-            text.startswith("[ERROR] +") or
-            text.startswith("[DEBUG] +")
-        ):
-            self._prz_original_respond_info(msg)
-            return
-
-        level, clean_msg = self._prz_parse_log_level(text)
-
-        if self._prz_should_log(level):
-            self._prz_original_respond_info(
-                self._prz_render_log(level, clean_msg)
-            )
-
-    except Exception:
-        self._prz_original_respond_info(msg)
 
     def Device_SetLogLevel(self, gcmd):
         level = gcmd.get_int("LEVEL", self.G_LogVerbosity)
