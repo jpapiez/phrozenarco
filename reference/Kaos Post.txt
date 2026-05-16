@@ -1,0 +1,25 @@
+🖨️ KAOS for Phrozen Arco — Klipper Add-On System
+
+If you're running a Phrozen Arco and want more out of your Klipper setup, KAOS is a free, open-source configuration package built to plug in on top of stock firmware without breaking anything Phrozen ships.
+What it adds:
+
+🔒 Safety & Homing Protection — The stock Arco can silently report axes as "homed" when they aren't. KAOS adds a trusted-home framework that guards movement macros and prevents unsafe motion after startup or unexpected shutdowns.
+
+🧹 AMS / Chroma / Purge Improvements — Better handling of color changes, wipe sequences, and purge routines, including reduced purge waste, safer service moves, and improved post-purge priming.
+
+📐 Adaptive Bed Mesh & Z Tilt — Mesh density adjusts based on print size. Z tilt runs once per session automatically and skips re-runs unless needed.
+
+📱 KAOS Menu — A quick-access popup menu right in your printer UI. One tap gives you homing, lights, calibration, dynamic speed toggle, fan/stepper controls, and more — no digging through console commands.
+
+⚡ Dynamic Speed by Height — Automatically reduces speed and acceleration as prints get taller. Great for tall, narrow, or top-heavy prints. Restores original settings when disabled.
+
+🌡️ Board Fan Control — MCU and CPU temperature-based fan management to protect your electronics.
+
+🔇 CPU Fix — Disables a stock background script that burns ~10% of Arco CPU doing nothing (a leftover test process checking for a button that doesn't exist).
+
+🌐 Multi-Language Console Logging — Log messages in English, French, or Chinese, with adjustable log level and category filtering to cut down noise. More languages on request. (This version only translates python original Chinese pyhton messages, not klipper layer, so english still remains in all languages) 
+
+📦 USB Installer — Installs via the standard Phrozen USB update flow.
+
+⚠️ Power-loss recovery note: In this version, if you experience a power loss, you'll need to use Fluidd to authorize recovery before tapping the resume option on the touchscreen. Full onscreen recovery flow is planned for a future release.
+GitLab: https://gitlab.com/sanders.chris/phrozenarco

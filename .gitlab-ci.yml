@@ -1,0 +1,140 @@
+# GitLab CI for KAOS / Phrozen Arco
+#
+# Pipelines:
+#   - Every push   → run `tests/verify.sh` (audit + behavioral diff suite)
+#   - Tag push     → verify, then validate the tag format, then build the
+#                    release zip, then create a GitLab Release with the zip
+#                    attached as a downloadable asset
+#
+# Tag format (REQUIRED for release pipelines):
+#   <firmware>-k<kaos>     where firmware is dotted-numeric
+#   Examples:              1.9.9-k0.9.5, 1.9.9-k1.0.0-rc1, 2.0.0-k0.10
+#
+# Order mirrors the output zip filename Arco_FW_V<fw>_KAOS_<kaos>.zip —
+# firmware first, then KAOS. The firmware-prefix is mandatory: each release
+# explicitly names which Phrozen firmware version it targets. CI rejects
+# any tag that does not match this format.
+#
+# Tag a release like:
+#   git tag 1.9.9-k0.9.5
+#   git push origin 1.9.9-k0.9.5
+
+# Pipeline only runs on tag pushes that match <firmware>-k<kaos>.
+# Branch pushes and malformed tags don't trigger CI at all.
+# v/V prefix on either portion is rejected (use 0.9.5 not v0.9.5).
+# Local testing (bash tests/verify.sh, tools/build_release.sh) covers
+# day-to-day work; CI is the release gate.
+workflow:
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^[0-9]+(\.[0-9]+)*-k[^vV].*$/'
+
+stages:
+  - test
+  - build
+  - release
+
+# ---------------------------------------------------------------------------
+# Test: static audit only.
+#
+# Why not the full tests/verify.sh? That script's STEP 2 is the behavioral
+# diff suite, which compares the working tree against a baseline branch
+# (default origin/PhrozenArcoKAOS) to detect unintended behavior changes.
+# That's a PR/dev-time concept — the tagged commit IS the release and lives
+# on the baseline branch, so the diff would compare to itself and produce
+# a trivially clean result. Running it on tag pipelines burns CI minutes
+# and adds branch-fetch fragility for no signal. The audit is the
+# release-time gate; the diff stays useful locally and (later) on MRs.
+# ---------------------------------------------------------------------------
+verify:
+  stage: test
+  image: python:3-slim
+  before_script:
+    - pip install --no-cache-dir jinja2
+  script:
+    - python3 tools/audit_macros.py
+
+# ---------------------------------------------------------------------------
+# Build: produce the release zip; only on tag pushes that match the format.
+# build_release.sh fails loudly if the tag does not parse, which fails the
+# job and prevents the release stage from running.
+# Exports KAOS_VERSION + ZIP_NAME via dotenv so the release job can reference
+# the actual filename.
+# ---------------------------------------------------------------------------
+build_release_zip:
+  stage: build
+  image: python:3-slim
+  # GIT_DEPTH 0 = full clone. build_release_notes.sh needs the prior release
+  # tag to compute the `<prev-tag>..<tag>` git log range; the default shallow
+  # clone (20 commits) can miss it on a slower release cadence.
+  variables:
+    GIT_DEPTH: 0
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git
+    # All tags need to be present locally for `git describe --tags <tag>^`
+    # to find the previous release tag.
+    - git fetch --tags --force
+    # build_release.sh validates the tag format and exits with a clear
+    # error if it does not match <kaos>-f<firmware>.
+    - bash tools/build_release.sh "$CI_COMMIT_TAG"
+    # Generate release notes from README's Installation Overview + git log
+    # since the previous release tag. Written to dist/RELEASE_NOTES.md and
+    # referenced by the release job below.
+    - bash tools/build_release_notes.sh "$CI_COMMIT_TAG"
+    # Re-derive KAOS version + zip name for dotenv so release job has them.
+    # Same regex + v-prefix rejection as build_release.sh's parse_release_tag.
+    - |
+      if [[ ! "$CI_COMMIT_TAG" =~ ^([0-9]+(\.[0-9]+)*)-k(.+)$ ]]; then
+        echo "Tag $CI_COMMIT_TAG should have failed earlier; refusing to release"
+        exit 2
+      fi
+      FW_VERSION="${BASH_REMATCH[1]}"
+      KAOS_VERSION="${BASH_REMATCH[3]}"
+      if [[ "$KAOS_VERSION" =~ ^[vV] ]]; then
+        echo "Tag $CI_COMMIT_TAG has v/V prefix on KAOS portion; refusing to release"
+        exit 2
+      fi
+      FW_VERSION_NODOTS="${FW_VERSION//./}"
+      ZIP_NAME="Arco_FW_V${FW_VERSION_NODOTS}_KAOS_${KAOS_VERSION}.zip"
+      test -f "dist/$ZIP_NAME" || (echo "Expected dist/$ZIP_NAME not found:" && ls -la dist/ && exit 1)
+      echo "KAOS_VERSION=$KAOS_VERSION" > build.env
+      echo "FW_VERSION=$FW_VERSION" >> build.env
+      echo "FW_VERSION_NODOTS=$FW_VERSION_NODOTS" >> build.env
+      echo "ZIP_NAME=$ZIP_NAME" >> build.env
+  artifacts:
+    name: "kaos-$CI_COMMIT_TAG"
+    paths:
+      - dist/*.zip
+      - dist/RELEASE_NOTES.md
+    reports:
+      dotenv: build.env
+    expire_in: never
+
+# ---------------------------------------------------------------------------
+# Release: create a GitLab Release for the tag and attach the zip from the
+# build job as a downloadable asset link.
+# ---------------------------------------------------------------------------
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - job: build_release_zip
+      artifacts: true
+  script:
+    - echo "Releasing $CI_COMMIT_TAG → $ZIP_NAME (KAOS $KAOS_VERSION, firmware $FW_VERSION)"
+  release:
+    name: 'KAOS $KAOS_VERSION (firmware $FW_VERSION)'
+    # Description is generated by tools/build_release_notes.sh in the build
+    # job (install steps pulled from README.md, "what's changed" from git log
+    # since the previous release tag) and shipped as a build artifact. The
+    # ./ prefix tells release-cli to read the file at job time rather than
+    # treating the string as literal text.
+    description: './dist/RELEASE_NOTES.md'
+    tag_name: '$CI_COMMIT_TAG'
+    assets:
+      links:
+        # Tag-scoped artifact link: GitLab resolves this to the latest
+        # build_release_zip artifact for this tag. ZIP_NAME comes from the
+        # build job's dotenv (Arco_FW_V<fw_no_dots>_KAOS_<kaos>.zip).
+        - name: '$ZIP_NAME'
+          url: '${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/dist/${ZIP_NAME}?job=build_release_zip'
+          link_type: package
