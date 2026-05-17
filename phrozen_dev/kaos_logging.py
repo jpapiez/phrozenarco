@@ -150,15 +150,6 @@ def install_kaos_logging(obj):
         # Do not risk printer startup if command registration fails.
         pass
 
-    # Register KAOS_T translatable message command if available.
-    # Keep the KAOS_T implementation in kaos_translations.py so dev.py only
-    # needs to install this logging/bootstrap module.
-    try:
-        from .kaos_translations import install_kaos_t_command
-        install_kaos_t_command(obj)
-    except Exception:
-        # Do not risk printer startup if KAOS_T registration fails.
-        pass
 
 
 def _kaos_strip_level_prefix(self, msg):
