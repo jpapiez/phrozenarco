@@ -43,7 +43,7 @@ KAOS_LOG_LEVEL_INFO = 2
 KAOS_LOG_LEVEL_DEBUG = 3
 
 # Visible marker so we can prove which file Klipper loaded.
-KAOS_LOGGING_VERSION = "KAOS-v0.95-2026-05-04"
+KAOS_LOGGING_VERSION = "KAOS-v0.95.1-2026-05-17-screen-hmi-bypass"
 
 KAOS_LEVEL_TAGS = ("[ERROR]", "[WARN]", "[INFO]", "[DEBUG]")
 
@@ -108,6 +108,7 @@ def install_kaos_logging(obj):
     obj.kaos_is_protocol_message = _kaos_is_protocol_message.__get__(obj, obj.__class__)
     obj.kaos_is_ams_state_json = _kaos_is_ams_state_json.__get__(obj, obj.__class__)
     obj.kaos_is_functional_light_message = _kaos_is_functional_light_message.__get__(obj, obj.__class__)
+    obj.kaos_is_hmi_sensitive_message = _kaos_is_hmi_sensitive_message.__get__(obj, obj.__class__)
     obj.kaos_is_silenced_serial_noise = _kaos_is_silenced_serial_noise.__get__(obj, obj.__class__)
     obj.kaos_is_known_debug_noise = _kaos_is_known_debug_noise.__get__(obj, obj.__class__)
     obj.kaos_emit_protocol = _kaos_emit_protocol.__get__(obj, obj.__class__)
@@ -147,6 +148,16 @@ def install_kaos_logging(obj):
         )
     except Exception:
         # Do not risk printer startup if command registration fails.
+        pass
+
+    # Register KAOS_T translatable message command if available.
+    # Keep the KAOS_T implementation in kaos_translations.py so dev.py only
+    # needs to install this logging/bootstrap module.
+    try:
+        from .kaos_translations import install_kaos_t_command
+        install_kaos_t_command(obj)
+    except Exception:
+        # Do not risk printer startup if KAOS_T registration fails.
         pass
 
 
@@ -313,6 +324,59 @@ def _kaos_is_functional_light_message(self, msg):
     return False
 
 
+
+def _kaos_is_hmi_sensitive_message(self, msg):
+    """Detect vendor screen/HMI traffic that must pass through raw.
+
+    Screen-started prints appear to depend on some Phrozen responder strings
+    exactly as emitted. These strings look like debug chatter and may match the
+    known-debug filter, but re-rendering them as KAOS [DEBUG] lines can break
+    the touchscreen print-start handshake. Keep this narrow and pass them
+    through byte-for-byte via the original responder.
+    """
+    text = str(msg).strip()
+
+    hmi_sensitive_tokens = (
+        # Screen / vendor print-start command path
+        "Cmds_CmdP0",
+        "Cmds_CmdP2",
+        "Cmds_CmdP8",
+        "Cmds_CmdP28",
+        "Cmds_CmdP29",
+        "Cmds_CmdP30",
+        "Cmds_CmdP114",
+
+        # Screen-visible homing/start markers
+        "homing_override_start",
+        "homing_override_end",
+        "MAINTENANCE_ITEM_PARAM",
+
+        # Vendor external macro bridge
+        "外部宏命令-",
+        "开始调用外部宏命令-",
+        "结束调用外部宏命令",
+        "调用外部宏-",
+        "调用宏命令:",
+        "External macro command-",
+        "External macro command ",
+        "Starting external macro",
+        "Finished external macro",
+
+        # Common print / AMS mode state messages
+        "P0 M1",
+        "P0 M2",
+        "P0 M3",
+        "P28",
+        "P2 A1",
+        "P2 A2",
+        "多色模式",
+        "单色模式",
+        "续料",
+    )
+
+    return any(token in text for token in hmi_sensitive_tokens)
+
+
 def _kaos_is_silenced_serial_noise(self, msg):
     """Suppress known harmless missing-tty2 chatter.
 
@@ -458,6 +522,12 @@ def _kaos_filtered_respond_info(self, msg):
             self.kaos_emit_protocol(raw_text)
             return
 
+        # Screen/HMI print-start traffic looks like debug output but may be
+        # parsed by the touchscreen path. It must pass through raw.
+        if self.kaos_is_hmi_sensitive_message(raw_text):
+            self.kaos_emit_protocol(raw_text)
+            return
+
         # Light-control P0 LED traffic looks like debug output but is functional.
         # It must bypass the filter before translation/classification.
         if self.kaos_is_functional_light_message(raw_text):
@@ -475,6 +545,12 @@ def _kaos_filtered_respond_info(self, msg):
         # Functional protocol/status must still bypass logging if a translated
         # line or a manually tagged line wraps it as [INFO] +P114:2, etc.
         if self.kaos_is_protocol_message(clean_text) or self.kaos_is_ams_state_json(clean_text):
+            self.kaos_emit_protocol(clean_text)
+            return
+
+        # Screen/HMI-sensitive traffic may also appear after translation or
+        # level/category parsing. Still pass it through without KAOS re-rendering.
+        if self.kaos_is_hmi_sensitive_message(clean_text):
             self.kaos_emit_protocol(clean_text)
             return
 
