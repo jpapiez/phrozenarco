@@ -19,11 +19,12 @@ Use at your own risk. Keep backups of your working configuration before installi
 ### Installation
 1. Download the latest version here: [Releases](https://gitlab.com/sanders.chris/phrozenarco/-/releases)
 2. Follow the [Installation Instructions](#installation-overview)
-3. Update your slicer G-Code as per: [KAOS G-code](https://gitlab.com/sanders.chris/phrozenarco/-/blob/88ec4c1dad946d2dc2edc06f8f370d3c5bf3f168/KAOS_Slicer_G-Code.md)
+3. Update your slicer G-Code as per: [KAOS G-code](https://gitlab.com/sanders.chris/phrozenarco/-/blob/88ec4c1dad946d2dc2edc06f8f370d3c5bf3f168/KAOS_Slicer_G-Code.md) AND update your Printer settings as per [this image](https://gitlab.com/sanders.chris/phrozenarco/-/blob/3c667b6c2e2b4637c36a89a9f12216ea17e43411/reference/adaptive_mesh.png).
 
  **OR**
 
 - Import this printer configuration: [Phrozen_Arco_0.4_nozzle_-_KAOS.json](https://gitlab.com/sanders.chris/phrozenarco/-/blob/067a86d268c13eaab3aa74ce2a9ff3ca1f85ff18/preset%20repository/Phrozen_Arco_0.4_nozzle_-_KAOS.json)
+
 
 
 
