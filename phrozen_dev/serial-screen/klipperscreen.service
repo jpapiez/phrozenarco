@@ -1,0 +1,13 @@
+[Unit]
+Description=KlipperScreen Startup Script
+Requires=moonraker.service
+After=moonraker.service
+
+[Service]
+ExecStart=/bin/bash /home/mks/klipper/klippy/extras/phrozen_dev/KlipperScreen-start.sh
+User=mks
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=final.target

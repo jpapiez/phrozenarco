@@ -28,14 +28,6 @@ import json
 import re
 import time
 
-try:
-    from .kaos_translations import kaos_translate_message, kaos_normalize_language
-except Exception:
-    def kaos_normalize_language(language):
-        return "en"
-    def kaos_translate_message(message, language="en"):
-        return str(message)
-
 # Runtime log verbosity levels
 KAOS_LOG_LEVEL_ERROR = 0
 KAOS_LOG_LEVEL_WARN = 1
@@ -68,6 +60,7 @@ KAOS_PROTOCOL_PREFIXES = (
     "+B:",
     "+D:",
     "+Cut:",
+    "+Zero:",
 )
 
 # Keys seen in AMS detail/simple state JSON payloads.
@@ -92,7 +85,10 @@ def install_kaos_logging(obj):
     obj.KAOS_LogVerbosity = KAOS_LOG_LEVEL_WARN
     obj.KAOS_LogCategoriesEnabled = True
     obj.KAOS_LogTimestampEnabled = False
-    obj.KAOS_LogLanguage = "en"
+
+    # AMS presence: read from [phrozen_dev] ams_attached option in printer.cfg.
+    # Defaults to False — users with AMS set ams_attached: true.
+    obj.KAOS_AmsEnabled = obj.G_PhrozenConfig.getboolean("ams_attached", False)
 
     # Preserve original vendor responder exactly once.
     if not hasattr(obj, "KAOS_OriginalRespondInfo"):
@@ -107,7 +103,9 @@ def install_kaos_logging(obj):
     obj.kaos_render_log = _kaos_render_log.__get__(obj, obj.__class__)
     obj.kaos_is_protocol_message = _kaos_is_protocol_message.__get__(obj, obj.__class__)
     obj.kaos_is_ams_state_json = _kaos_is_ams_state_json.__get__(obj, obj.__class__)
-    obj.kaos_is_functional_light_message = _kaos_is_functional_light_message.__get__(obj, obj.__class__)
+    obj.kaos_is_functional_light_message = _kaos_is_functional_light_message.__get__(
+        obj, obj.__class__
+    )
     obj.kaos_is_hmi_sensitive_message = _kaos_is_hmi_sensitive_message.__get__(obj, obj.__class__)
     obj.kaos_is_silenced_serial_noise = _kaos_is_silenced_serial_noise.__get__(obj, obj.__class__)
     obj.kaos_is_known_debug_noise = _kaos_is_known_debug_noise.__get__(obj, obj.__class__)
@@ -117,12 +115,13 @@ def install_kaos_logging(obj):
     obj.KAOS_SetLogLevel = _KAOS_SetLogLevel.__get__(obj, obj.__class__)
     obj.KAOS_SetLogFlags = _KAOS_SetLogFlags.__get__(obj, obj.__class__)
     obj.KAOS_LogStatus = _KAOS_LogStatus.__get__(obj, obj.__class__)
-    obj.KAOS_SetLogLanguage = _KAOS_SetLogLanguage.__get__(obj, obj.__class__)
 
     # Replace vendor responder with KAOS wrapper.
     obj.G_PhrozenFluiddRespondInfo = obj.kaos_filtered_respond_info
 
-    obj.KAOS_OriginalRespondInfo("[WARN] [KAOS] kaos_logging loaded version %s" % KAOS_LOGGING_VERSION)
+    obj.KAOS_OriginalRespondInfo(
+        "[WARN] [KAOS] kaos_logging loaded version %s" % KAOS_LOGGING_VERSION
+    )
 
     # Register KAOS runtime commands if possible.
     try:
@@ -137,11 +136,6 @@ def install_kaos_logging(obj):
             desc="Set KAOS log flags (CATEGORIES=0/1 TIMESTAMP=0/1)",
         )
         obj.G_PhrozenGCode.register_command(
-            "KAOS_LOG_LANGUAGE",
-            obj.KAOS_SetLogLanguage,
-            desc="Set KAOS message language (LANG=en/fr/zh)",
-        )
-        obj.G_PhrozenGCode.register_command(
             "KAOS_LOG_STATUS",
             obj.KAOS_LogStatus,
             desc="Show KAOS logging version and current settings",
@@ -149,7 +143,6 @@ def install_kaos_logging(obj):
     except Exception:
         # Do not risk printer startup if command registration fails.
         pass
-
 
 
 def _kaos_strip_level_prefix(self, msg):
@@ -174,7 +167,7 @@ def _kaos_strip_level_prefix(self, msg):
     )
     for tag, level in standard_tag_map:
         if text.startswith(tag):
-            return level, text[len(tag):].strip()
+            return level, text[len(tag) :].strip()
 
     # Normalize old KAOS-prefixed level-style input without preserving the
     # original tag text. This prevents old emitters from leaking nonstandard
@@ -188,6 +181,7 @@ def _kaos_strip_level_prefix(self, msg):
         return level, clean
 
     return None, text
+
 
 def _kaos_parse_log_level(self, msg):
     """Parse explicit log level. Untagged legacy messages remain unclassified."""
@@ -219,6 +213,7 @@ def _kaos_strip_category_prefix(self, msg):
     clean = match.group(2).strip()
     return category, clean
 
+
 def _kaos_should_log(self, level):
     level_map = {
         "ERROR": KAOS_LOG_LEVEL_ERROR,
@@ -233,15 +228,38 @@ def _kaos_detect_log_category(self, msg):
     lowered = str(msg).lower()
     if any(token in lowered for token in ["serial", "tty", "uart", "usb", "p28", "p29"]):
         return "SERIAL"
-    if any(token in lowered for token in [
-        "toolhead", "nozzle", "purge", "spit", "cut", "park",
-        "pause_waitingarea", "movement", "move", "hall sensor",
-    ]):
+    if any(
+        token in lowered
+        for token in [
+            "toolhead",
+            "nozzle",
+            "purge",
+            "spit",
+            "cut",
+            "park",
+            "pause_waitingarea",
+            "movement",
+            "move",
+            "hall sensor",
+        ]
+    ):
         return "TOOLHEAD"
-    if any(token in lowered for token in [
-        "ams", "filament", "channel", "multicolor", "multi-material",
-        "runout", "p0m3", "p114", "mc_state", "ma_state", "chroma",
-    ]):
+    if any(
+        token in lowered
+        for token in [
+            "ams",
+            "filament",
+            "channel",
+            "multicolor",
+            "multi-material",
+            "runout",
+            "p0m3",
+            "p114",
+            "mc_state",
+            "ma_state",
+            "chroma",
+        ]
+    ):
         return "AMS"
     return "DEV"
 
@@ -263,6 +281,7 @@ def _kaos_render_log(self, level, msg, category=None):
 
     parts.append(str(msg))
     return " ".join(parts)
+
 
 def _kaos_is_protocol_message(self, msg):
     text = str(msg).strip()
@@ -315,7 +334,6 @@ def _kaos_is_functional_light_message(self, msg):
     return False
 
 
-
 def _kaos_is_hmi_sensitive_message(self, msg):
     """Detect vendor screen/HMI traffic that must pass through raw.
 
@@ -324,6 +342,9 @@ def _kaos_is_hmi_sensitive_message(self, msg):
     known-debug filter, but re-rendering them as KAOS [DEBUG] lines can break
     the touchscreen print-start handshake. Keep this narrow and pass them
     through byte-for-byte via the original responder.
+
+    Important: match stable command/marker tokens only (not translated or
+    localized prose) so behavior remains correct regardless of language.
     """
     text = str(msg).strip()
 
@@ -336,23 +357,10 @@ def _kaos_is_hmi_sensitive_message(self, msg):
         "Cmds_CmdP29",
         "Cmds_CmdP30",
         "Cmds_CmdP114",
-
         # Screen-visible homing/start markers
         "homing_override_start",
         "homing_override_end",
         "MAINTENANCE_ITEM_PARAM",
-
-        # Vendor external macro bridge
-        "外部宏命令-",
-        "开始调用外部宏命令-",
-        "结束调用外部宏命令",
-        "调用外部宏-",
-        "调用宏命令:",
-        "External macro command-",
-        "External macro command ",
-        "Starting external macro",
-        "Finished external macro",
-
         # Common print / AMS mode state messages
         "P0 M1",
         "P0 M2",
@@ -360,9 +368,6 @@ def _kaos_is_hmi_sensitive_message(self, msg):
         "P28",
         "P2 A1",
         "P2 A2",
-        "多色模式",
-        "单色模式",
-        "续料",
     )
 
     return any(token in text for token in hmi_sensitive_tokens)
@@ -385,7 +390,7 @@ def _kaos_is_silenced_serial_noise(self, msg):
     tty2_missing_markers = (
         "unable to open tty2",
         "ams2/tty2 not available",
-        "未能打开tty2口",
+        "open tty2 failed",
         "tty2 not available",
     )
     return any(marker in lowered for marker in tty2_missing_markers)
@@ -408,7 +413,6 @@ def _kaos_is_known_debug_noise(self, msg):
         "self.Flag=",
         "command_string=",
         "gcmd is not None:",
-
         # Phrozen function-entry traces
         "=====[(cmds.python)",
         "===== [(cmds.python)",
@@ -418,23 +422,9 @@ def _kaos_is_known_debug_noise(self, msg):
         "[(cmds.py)",
         "[(dev.python)",
         "[(dev.py)",
-
-        # Chinese vendor command/motion traces. These are human console/debug
-        # lines showing commands already being sent through run_script_from_command.
+        # Vendor command/motion traces. These are human console/debug lines
+        # showing commands already being sent through run_script_from_command.
         # They are not the functional +P/+Mode/+T protocol/status bus.
-        "外部宏命令-",
-        "开始调用外部宏命令-",
-        "结束调用外部宏命令",
-        "调用外部宏-",
-        "调用宏命令:",
-        "Z轴临时抬升",
-        "Z轴临时下降",
-        "Z轴下拉降低",
-        "Z轴上拉升高",
-        "Z轴上升",
-        "恢复结束，开启风扇",
-
-        # English/French translations of the same vendor debug families.
         "External macro command-",
         "External macro command ",
         "Starting external macro",
@@ -447,21 +437,17 @@ def _kaos_is_known_debug_noise(self, msg):
         "Appel de la macro externe",
         "Abaissement temporaire de Z",
         "Relèvement temporaire de Z",
-
         # Serial byte dump chatter
         "byte count",
         "byte stream",
         "Lo_SerialRxBytes[",
         "ASCII character",
-
         # Local filesystem / image-id debug traces
         "current_directory=",
         "filename=",
-
         # Pause-state debug traces
         "Current pause state",
         "Lo_PauseStatus",
-
         # Misc vendor debug text observed during P114/P28/startup
         "has unit AMSalready openserial port=",
         "successfulopenAMSAMShas unit",
@@ -475,8 +461,8 @@ def _kaos_is_known_debug_noise(self, msg):
         "Cmds_P1TnManualChangeChannel",
         "Cmds_P1CnAutoChangeChannel",
         "command_string='",
-        "gcode命令=",
-        "GCODE命令",
+        "gcode command=",
+        "GCODE command",
         "G-code command",
         "gcodecommand=",
     )
@@ -508,7 +494,7 @@ def _kaos_filtered_respond_info(self, msg):
     try:
         raw_text = str(msg).strip()
 
-        # Raw functional protocol/status must bypass translation and logging.
+        # Raw functional protocol/status must bypass logging normalization.
         if self.kaos_is_protocol_message(raw_text) or self.kaos_is_ams_state_json(raw_text):
             self.kaos_emit_protocol(raw_text)
             return
@@ -520,7 +506,7 @@ def _kaos_filtered_respond_info(self, msg):
             return
 
         # Light-control P0 LED traffic looks like debug output but is functional.
-        # It must bypass the filter before translation/classification.
+        # It must bypass the filter before classification.
         if self.kaos_is_functional_light_message(raw_text):
             self.kaos_emit_protocol(raw_text)
             return
@@ -529,17 +515,15 @@ def _kaos_filtered_respond_info(self, msg):
         if self.kaos_is_silenced_serial_noise(raw_text):
             return
 
-        # Translate human-facing vendor text before parsing [INFO]/[WARN]/etc.
-        translated_text = kaos_translate_message(raw_text, self.KAOS_LogLanguage)
-        level, clean_text = self.kaos_strip_level_prefix(translated_text)
+        level, clean_text = self.kaos_strip_level_prefix(raw_text)
 
-        # Functional protocol/status must still bypass logging if a translated
-        # line or a manually tagged line wraps it as [INFO] +P114:2, etc.
+        # Functional protocol/status must still bypass logging if a manually
+        # tagged line wraps it as [INFO] +P114:2, etc.
         if self.kaos_is_protocol_message(clean_text) or self.kaos_is_ams_state_json(clean_text):
             self.kaos_emit_protocol(clean_text)
             return
 
-        # Screen/HMI-sensitive traffic may also appear after translation or
+        # Screen/HMI-sensitive traffic may also appear after
         # level/category parsing. Still pass it through without KAOS re-rendering.
         if self.kaos_is_hmi_sensitive_message(clean_text):
             self.kaos_emit_protocol(clean_text)
@@ -550,7 +534,7 @@ def _kaos_filtered_respond_info(self, msg):
             self.kaos_emit_protocol(clean_text)
             return
 
-        # Known harmless missing-tty2 noise may appear after translation.
+        # Known harmless missing-tty2 noise may appear after level/category parsing.
         if self.kaos_is_silenced_serial_noise(clean_text):
             return
 
@@ -582,30 +566,29 @@ def _kaos_filtered_respond_info(self, msg):
             self.kaos_log("DEBUG", clean_text)
             return
 
-        # Unknown untagged messages pass through. If translation changed the text,
-        # show the translated text; otherwise preserve the vendor message.
-        self.KAOS_OriginalRespondInfo(translated_text)
+        # Unknown untagged messages pass through as-is.
+        self.KAOS_OriginalRespondInfo(raw_text)
 
     except Exception:
         # Fail open to avoid breaking printer behavior if classifier has a bug.
         self.KAOS_OriginalRespondInfo(msg)
 
 
-
 def _KAOS_LogStatus(self, gcmd):
     self.KAOS_OriginalRespondInfo(
         self.kaos_render_log(
             "WARN",
-            "KAOS logging status version=%s level=%d categories=%d timestamp=%d language=%s" % (
+            "KAOS logging status version=%s level=%d categories=%d timestamp=%d"
+            % (
                 KAOS_LOGGING_VERSION,
                 self.KAOS_LogVerbosity,
                 1 if self.KAOS_LogCategoriesEnabled else 0,
                 1 if self.KAOS_LogTimestampEnabled else 0,
-                self.KAOS_LogLanguage,
             ),
             "KAOS",
         )
     )
+
 
 def _KAOS_SetLogLevel(self, gcmd):
     level = gcmd.get_int("LEVEL", self.KAOS_LogVerbosity)
@@ -623,20 +606,6 @@ def _KAOS_SetLogLevel(self, gcmd):
     )
 
 
-def _KAOS_SetLogLanguage(self, gcmd):
-    lang = gcmd.get("LANG", None)
-    if lang is None:
-        lang = gcmd.get("LANGUAGE", self.KAOS_LogLanguage)
-    self.KAOS_LogLanguage = kaos_normalize_language(lang)
-    self.KAOS_OriginalRespondInfo(
-        self.kaos_render_log(
-            "INFO",
-            "KAOS log language set to %s (en=English, fr=French, zh=original Chinese)" % self.KAOS_LogLanguage,
-            "KAOS",
-        )
-    )
-
-
 def _KAOS_SetLogFlags(self, gcmd):
     self.KAOS_LogCategoriesEnabled = bool(
         gcmd.get_int("CATEGORIES", 1 if self.KAOS_LogCategoriesEnabled else 0)
@@ -647,7 +616,8 @@ def _KAOS_SetLogFlags(self, gcmd):
     self.KAOS_OriginalRespondInfo(
         self.kaos_render_log(
             "INFO",
-            "KAOS log flags updated: CATEGORIES=%d TIMESTAMP=%d" % (
+            "KAOS log flags updated: CATEGORIES=%d TIMESTAMP=%d"
+            % (
                 1 if self.KAOS_LogCategoriesEnabled else 0,
                 1 if self.KAOS_LogTimestampEnabled else 0,
             ),
