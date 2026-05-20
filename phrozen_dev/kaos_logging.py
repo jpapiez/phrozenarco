@@ -486,6 +486,10 @@ def _kaos_emit_protocol(self, msg):
 
 
 def _kaos_log(self, level, msg, category=None):
+    # Light-control P0 LED traffic must always pass through regardless of level.
+    if self.kaos_is_functional_light_message(msg):
+        self.kaos_emit_protocol(msg)
+        return
     if self.kaos_should_log(level):
         self.KAOS_OriginalRespondInfo(self.kaos_render_log(level, msg, category))
 
