@@ -467,34 +467,11 @@ def _kaos_filtered_respond_info(self, msg):
     try:
         raw_text = str(msg).strip()
 
-        # Raw functional protocol/status must bypass logging normalization.
-        if self.kaos_is_protocol_message(raw_text) or self.kaos_is_ams_state_json(raw_text):
-            self.kaos_emit_protocol(raw_text)
-            return
-
-        # Screen/HMI print-start traffic looks like debug output but may be
-        # parsed by the touchscreen path. It must pass through raw.
-        if self.kaos_is_hmi_sensitive_message(raw_text):
-            self.kaos_emit_protocol(raw_text)
-            return
-
         # Known harmless missing-tty2 noise should be dropped even if tagged ERROR.
         if self.kaos_is_silenced_serial_noise(raw_text):
             return
 
         level, clean_text = self.kaos_strip_level_prefix(raw_text)
-
-        # Functional protocol/status must still bypass logging if a manually
-        # tagged line wraps it as [INFO] +P114:2, etc.
-        if self.kaos_is_protocol_message(clean_text) or self.kaos_is_ams_state_json(clean_text):
-            self.kaos_emit_protocol(clean_text)
-            return
-
-        # Screen/HMI-sensitive traffic may also appear after
-        # level/category parsing. Still pass it through without KAOS re-rendering.
-        if self.kaos_is_hmi_sensitive_message(clean_text):
-            self.kaos_emit_protocol(clean_text)
-            return
 
         # Known harmless missing-tty2 noise may appear after level/category parsing.
         if self.kaos_is_silenced_serial_noise(clean_text):

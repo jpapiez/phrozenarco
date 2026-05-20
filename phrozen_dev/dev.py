@@ -231,7 +231,7 @@ class PhrozenDev(Apis):
                 self.kaos_log(
                     "DEBUG", "[(dev.python)Device_TimmerRunoutCheck]P114 failed", "SERIAL"
                 )
-                # self.G_PhrozenFluiddRespondInfo("+P114:2")
+                # self.emit_p114(2)
                 # self.G_P114RunFlag=0
                 # empty Python dict
                 Lo_AMSDetailState = {
@@ -250,10 +250,10 @@ class PhrozenDev(Apis):
                 self.kaos_log("DEBUG", json.dumps(Lo_AMSDetailState), "SERIAL")
 
                 self.kaos_log("DEBUG", "P114 failed", "SERIAL")
-                self.G_PhrozenFluiddRespondInfo("+P114:2")
+                self.emit_p114(2)
                 self.G_P114RunFlag = 0
 
-            # self.G_PhrozenFluiddRespondInfo("+P114:1")
+            # self.emit_p114(1)
             # self.G_P114RunFlag=False
             # return eventtime + AMS_FILA_RUNOUT_TIMER
 
@@ -480,7 +480,7 @@ class PhrozenDev(Apis):
                                 )
                                 # Vendor note (250521): AMS multi-material present
                                 # if self.G_AMSDevice1IfNormal==True or self.G_AMSDevice2IfNormal==True:
-                                #    self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                                #    self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                                 # else:
                                 self.G_PhrozenFluiddRespondInfo(
                                     "+PAUSE:b,%d,%d"
@@ -617,7 +617,7 @@ class PhrozenDev(Apis):
                                                         "SERIAL",
                                                     )
                                                     self.PG102DelayPauseFlag = True
-                                                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                                                    # self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                                                     self.G_PauseToLCDString = "+PAUSE:g,%d,%d" % (
                                                         self.G_ChangeChannelTimeoutOldChan,
                                                         self.G_ChangeChannelTimeoutNewChan,
@@ -1208,7 +1208,7 @@ class PhrozenDev(Apis):
                                                         "SERIAL",
                                                     )
                                                     self.PG102DelayPauseFlag = True
-                                                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                                                    # self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                                                     self.G_PauseToLCDString = "+PAUSE:g,%d,%d" % (
                                                         self.G_ChangeChannelTimeoutOldChan,
                                                         self.G_ChangeChannelTimeoutNewChan,
@@ -1478,15 +1478,15 @@ class PhrozenDev(Apis):
         # // ttyUSB0 serial receive: CS00N0M03T04C0
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # Vendor note (240524): unknown mode (not M1-MC/M2-MA/M3), skip pause
         # if not in print mode, skip pause
@@ -1675,82 +1675,82 @@ class PhrozenDev(Apis):
                     # self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
                     if "+PAUSE:1,1" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "1", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,1")
+                        self.emit_pause(1, 1)
                         self.G_PauseToLCDString = "+PAUSE:1,1"
                         self.G_Pause1Channel = 1
                     elif "+PAUSE:1,2" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "2", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,2")
+                        self.emit_pause(1, 2)
                         self.G_PauseToLCDString = "+PAUSE:1,2"
                         self.G_Pause1Channel = 2
                     elif "+PAUSE:1,3" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "3", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,3")
+                        self.emit_pause(1, 3)
                         self.G_PauseToLCDString = "+PAUSE:1,3"
                         self.G_Pause1Channel = 3
                     elif "+PAUSE:1,4" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "4", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,4")
+                        self.emit_pause(1, 4)
                         self.G_PauseToLCDString = "+PAUSE:1,3"
                         self.G_Pause1Channel = 4
                     elif "+PAUSE:1,5" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "5", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,5")
+                        self.emit_pause(1, 5)
                         self.G_PauseToLCDString = "+PAUSE:1,5"
                         self.G_Pause1Channel = 5
                     elif "+PAUSE:1,6" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "6", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,6")
+                        self.emit_pause(1, 6)
                         self.G_PauseToLCDString = "+PAUSE:1,6"
                         self.G_Pause1Channel = 6
                     elif "+PAUSE:1,7" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "7", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,7")
+                        self.emit_pause(1, 7)
                         self.G_PauseToLCDString = "+PAUSE:1,7"
                         self.G_Pause1Channel = 7
                     elif "+PAUSE:1,8" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "8", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,8")
+                        self.emit_pause(1, 8)
                         self.G_PauseToLCDString = "+PAUSE:1,8"
                         self.G_Pause1Channel = 8
                     elif "+PAUSE:1,9" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "9", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,9")
+                        self.emit_pause(1, 9)
                         self.G_PauseToLCDString = "+PAUSE:1,9"
                         self.G_Pause1Channel = 9
                     elif "+PAUSE:1,10" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "10", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,10")
+                        self.emit_pause(1, 10)
                         self.G_PauseToLCDString = "+PAUSE:1,10"
                         self.G_Pause1Channel = 10
                     elif "+PAUSE:1,11" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "11", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,11")
+                        self.emit_pause(1, 11)
                         self.G_PauseToLCDString = "+PAUSE:1,11"
                         self.G_Pause1Channel = 11
                     elif "+PAUSE:1,12" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "12", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,12")
+                        self.emit_pause(1, 12)
                         self.G_PauseToLCDString = "+PAUSE:1,12"
                         self.G_Pause1Channel = 12
                     elif "+PAUSE:1,13" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "13", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,13")
+                        self.emit_pause(1, 13)
                         self.G_PauseToLCDString = "+PAUSE:1,13"
                         self.G_Pause1Channel = 13
                     elif "+PAUSE:1,14" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "14", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,14")
+                        self.emit_pause(1, 14)
                         self.G_PauseToLCDString = "+PAUSE:1,14"
                         self.G_Pause1Channel = 14
                     elif "+PAUSE:1,15" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "15", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,15")
+                        self.emit_pause(1, 15)
                         self.G_PauseToLCDString = "+PAUSE:1,15"
                         self.G_Pause1Channel = 15
                     elif "+PAUSE:1,16" in SerialRxASCIIStr:
                         self.kaos_log("DEBUG", "16", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+PAUSE:1,16")
+                        self.emit_pause(1, 16)
                         self.G_PauseToLCDString = "+PAUSE:1,16"
                         self.G_Pause1Channel = 16
                     else:
@@ -1790,7 +1790,7 @@ class PhrozenDev(Apis):
 
         if "+PAUSE:2" in SerialRxASCIIStr:
             self.kaos_log("DEBUG", "pause ACK", "SERIAL")
-            # self.G_PhrozenFluiddRespondInfo("+PAUSE:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+            # self.emit_protocol("+PAUSE:2,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             return
 
@@ -1839,7 +1839,7 @@ class PhrozenDev(Apis):
             #     self.G_KlipperIfPaused = True
             #     self.G_ChangeChannelFirstFilaFlag=True
             #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-            #     self.G_PhrozenFluiddRespondInfo("+PAUSE:3,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_protocol("+PAUSE:3,%d" % self.G_ChangeChannelTimeoutNewChan)
             #     # Vendor note (231209): handling business in timer causes errors; use thread for interrupt later
             #     self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
             # else:
@@ -1912,7 +1912,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:3,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:3,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:3,%d,%d"
@@ -1972,7 +1972,7 @@ class PhrozenDev(Apis):
             #     self.G_KlipperIfPaused = True
             #     self.G_ChangeChannelFirstFilaFlag=True
             #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-            #     self.G_PhrozenFluiddRespondInfo("+PAUSE:5,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_protocol("+PAUSE:5,%d" % self.G_ChangeChannelTimeoutNewChan)
             #     # Vendor note (231209): handling business in timer causes errors; use thread for interrupt later
             #     self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
             # else:
@@ -2045,7 +2045,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:5,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:5,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:5,%d,%d"
@@ -2105,7 +2105,7 @@ class PhrozenDev(Apis):
             #     self.G_KlipperIfPaused = True
             #     self.G_ChangeChannelFirstFilaFlag=True
             #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-            #     self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
             #     # Vendor note (231209): handling business in timer causes errors; use thread for interrupt later
             #     self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
             # else:
@@ -2177,7 +2177,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:4,%d,%d"
@@ -2237,7 +2237,7 @@ class PhrozenDev(Apis):
             #     self.G_KlipperIfPaused = True
             #     self.G_ChangeChannelFirstFilaFlag=True
             #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-            #     self.G_PhrozenFluiddRespondInfo("+PAUSE:6,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_protocol("+PAUSE:6,%d" % self.G_ChangeChannelTimeoutNewChan)
             #     # Vendor note (231209): handling business in timer causes errors; use thread for interrupt later
             #     self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
             # else:
@@ -2310,7 +2310,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:6,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:6,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:6,%d,%d"
@@ -2406,7 +2406,7 @@ class PhrozenDev(Apis):
             #     self.G_KlipperIfPaused = True
             #     self.G_ChangeChannelFirstFilaFlag=True
             #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-            #     self.G_PhrozenFluiddRespondInfo("+PAUSE:7,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_protocol("+PAUSE:7,%d" % self.G_ChangeChannelTimeoutNewChan)
             #     # Vendor note (231209): handling business in timer causes errors; use thread for interrupt later
             #     self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
             # else:
@@ -2515,7 +2515,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:7,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:7,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:7,%d,%d"
@@ -2582,7 +2582,7 @@ class PhrozenDev(Apis):
             #     self.G_KlipperIfPaused = True
             #     self.G_ChangeChannelFirstFilaFlag=True
             #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-            #     self.G_PhrozenFluiddRespondInfo("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_protocol("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
             #     # Vendor note (231209): handling business in timer causes errors; use thread for interrupt later
             #     self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
             # else:
@@ -2655,7 +2655,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:a,%d,%d"
@@ -2691,7 +2691,7 @@ class PhrozenDev(Apis):
                     # Vendor note (231202): P1 C?auto filament change,if1,if,continue1start
                     # self.G_ChangeChannelFirstFilaFlag=True
                     # self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:c,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    # self.emit_protocol("+PAUSE:c,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     self.G_PauseToLCDString = "+PAUSE:c,%d,%d" % (
                         self.G_ChangeChannelTimeoutOldChan,
                         self.G_ChangeChannelTimeoutNewChan,
@@ -2782,7 +2782,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:c,%d,%d"
@@ -2818,7 +2818,7 @@ class PhrozenDev(Apis):
                     # Vendor note (231202): P1 C?auto filament change,if1,if,continue1start
                     # self.G_ChangeChannelFirstFilaFlag=True
                     # self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
-                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:c,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    # self.emit_protocol("+PAUSE:c,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     self.G_PauseToLCDString = "+PAUSE:d,%d,%d" % (
                         self.G_ChangeChannelTimeoutOldChan,
                         self.G_ChangeChannelTimeoutNewChan,
@@ -2908,7 +2908,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:d,%d,%d"
@@ -3039,7 +3039,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:e,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:e,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:e,%d,%d"
@@ -3169,7 +3169,7 @@ class PhrozenDev(Apis):
                 self.G_PauseTriggerWhileChangeChannelFlag = True
                 self.kaos_log("DEBUG", "stm32 move pause up report, pause", "SERIAL")
                 # Vendor note (240325): repeated pause, still report to serial display
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:a,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 self.G_PhrozenFluiddRespondInfo(
                     "+PAUSE:f,%d,%d"
@@ -3382,7 +3382,7 @@ class PhrozenDev(Apis):
                     #     self.G_KlipperIfPaused = True
                     #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
                     #     if self.G_CancelFlag==False:
-                    #         # self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #         # self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #         # self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
                     #         self.G_PhrozenFluiddRespondInfo("AMS1 connectederrorpause")
 
@@ -3394,7 +3394,7 @@ class PhrozenDev(Apis):
                     #                 if self.PG102Flag==True:
                     #                     self.G_PhrozenFluiddRespondInfo("Purging is in progress. Delay the pause until purging finishes")
                     #                     self.PG102DelayPauseFlag=True
-                    #                     #self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #                     #self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #                     self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
                     #                 else:
                     #                     self.G_PhrozenFluiddRespondInfo("No purge in progress; can pause immediately")
@@ -3404,13 +3404,13 @@ class PhrozenDev(Apis):
                     #                     self.STM32ReprotPauseFlag=1
                     #                     # Vendor note (231202): P1 C?auto filament change,if1,if,continue1start
                     #                     self.G_ChangeChannelFirstFilaFlag=True
-                    #                     self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #                     self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #                     self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
                     #             else:
                     #                 self.G_PauseTriggerWhileChangeChannelFlag=True
                     #                 self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
 
-                    #         #     self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #         #     self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #         # Vendor note (20231013): disconnect
                     #         self.Device_DisconnectAMSDevice()
 
@@ -3431,7 +3431,7 @@ class PhrozenDev(Apis):
             # # Vendor note (240427): AMS error restart, needs logging
             # if self.G_AMS1ErrorRestartFlag == True:
             #     self.G_PhrozenFluiddRespondInfo("AMS1 error or restart; self.G_AMSErrorRestartCount=%d" % self.G_AMSErrorRestartCount)
-            #     self.G_PhrozenFluiddRespondInfo("+AMSReboot:%d" % self.G_AMSErrorRestartCount)
+            #     self.emit_protocol("+AMSReboot:%d" % self.G_AMSErrorRestartCount)
             #     self.G_AMS1ErrorRestartFlag = False
 
             #     try:
@@ -3460,15 +3460,15 @@ class PhrozenDev(Apis):
             if self.G_SerialPort1Obj.inWaiting() > 0:
                 self.kaos_log("DEBUG", "Current mode", "SERIAL")
                 if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                    self.emit_mode(0, "unkown")
                 elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                    self.emit_mode(1, "MC")
                 elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                    self.emit_mode(2, "MA")
                 elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                    self.emit_mode(3, "RUNOUT")
                 else:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                    self.emit_mode(-1, "error")
 
                 self.kaos_log(
                     "DEBUG",
@@ -3561,7 +3561,7 @@ class PhrozenDev(Apis):
                         self.kaos_log("DEBUG", json.dumps(Lo_AMSDetailState), "SERIAL")
 
                         self.kaos_log("DEBUG", "P114 successful", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+P114:1")
+                        self.emit_p114(1)
                         self.G_P114RunFlag = 0
 
                     else:
@@ -3922,15 +3922,15 @@ class PhrozenDev(Apis):
             )
             self.kaos_log("DEBUG", "Current mode", "SERIAL")
             if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                self.emit_mode(0, "unkown")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                self.emit_mode(1, "MC")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                self.emit_mode(2, "MA")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                self.emit_mode(3, "RUNOUT")
             else:
-                self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                self.emit_mode(-1, "error")
             # if AMS error restart, log it and send STM32 slow-feed command after restart
             # Vendor note (240427): AMS error restart, needs logging
             self.G_AMS1ErrorRestartFlag = True
@@ -3981,7 +3981,7 @@ class PhrozenDev(Apis):
                     #     self.G_KlipperIfPaused = True
                     #     #self.Cmds_PhrozenKlipperPauseNoneCmdToSTM32(None)
                     #     if self.G_CancelFlag==False:
-                    #         # self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #         # self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #         # self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
                     #         self.G_PhrozenFluiddRespondInfo("AMS2 connection error, pause")
 
@@ -3993,7 +3993,7 @@ class PhrozenDev(Apis):
                     #                 if self.PG102Flag==True:
                     #                     self.G_PhrozenFluiddRespondInfo("Purging is in progress. Delay the pause until purging finishes")
                     #                     self.PG102DelayPauseFlag=True
-                    #                     #self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #                     #self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #                     self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
                     #                 else:
                     #                     self.G_PhrozenFluiddRespondInfo("No purge in progress; can pause immediately")
@@ -4003,13 +4003,13 @@ class PhrozenDev(Apis):
                     #                     self.STM32ReprotPauseFlag=1
                     #                     # Vendor note (231202): P1 C?auto filament change,if1,if,continue1start
                     #                     self.G_ChangeChannelFirstFilaFlag=True
-                    #                     self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #                     self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #                     self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
                     #             else:
                     #                 self.G_PauseTriggerWhileChangeChannelFlag=True
                     #                 self.G_PauseToLCDString="+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan)
 
-                    #         #     self.G_PhrozenFluiddRespondInfo("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #         #     self.emit_protocol("+PAUSE:g,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #         # Vendor note (20231013): disconnect
                     #         self.Device_DisconnectAMSDevice()
 
@@ -4034,7 +4034,7 @@ class PhrozenDev(Apis):
             # # Vendor note (240427): AMS error restart, needs logging
             # if self.G_AMS1ErrorRestartFlag == True:
             #     self.G_PhrozenFluiddRespondInfo("AMS1 error or restart; self.G_AMSErrorRestartCount=%d" % self.G_AMSErrorRestartCount)
-            #     self.G_PhrozenFluiddRespondInfo("+AMSReboot:%d" % self.G_AMSErrorRestartCount)
+            #     self.emit_protocol("+AMSReboot:%d" % self.G_AMSErrorRestartCount)
             #     self.G_AMS1ErrorRestartFlag = False
 
             #     try:
@@ -4063,15 +4063,15 @@ class PhrozenDev(Apis):
             if self.G_SerialPort2Obj.inWaiting() > 0:
                 self.kaos_log("DEBUG", "Current mode", "SERIAL")
                 if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                    self.emit_mode(0, "unkown")
                 elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                    self.emit_mode(1, "MC")
                 elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                    self.emit_mode(2, "MA")
                 elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                    self.emit_mode(3, "RUNOUT")
                 else:
-                    self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                    self.emit_mode(-1, "error")
 
                 self.kaos_log(
                     "DEBUG",
@@ -4196,7 +4196,7 @@ class PhrozenDev(Apis):
                         self.kaos_log("DEBUG", json.dumps(Lo_AMSDetailState), "SERIAL")
 
                         self.kaos_log("DEBUG", "P114 successful", "SERIAL")
-                        self.G_PhrozenFluiddRespondInfo("+P114:1")
+                        self.emit_p114(1)
                         self.G_P114RunFlag = 0
 
                     else:
@@ -4557,15 +4557,15 @@ class PhrozenDev(Apis):
             )
             self.kaos_log("DEBUG", "Current mode", "SERIAL")
             if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                self.emit_mode(0, "unkown")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                self.emit_mode(1, "MC")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                self.emit_mode(2, "MA")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                self.emit_mode(3, "RUNOUT")
             else:
-                self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                self.emit_mode(-1, "error")
             # if AMS error restart, log it and send STM32 slow-feed command after restart
             # Vendor note (240427): AMS error restart, needs logging
             self.G_AMS2ErrorRestartFlag = True

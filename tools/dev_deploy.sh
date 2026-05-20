@@ -31,7 +31,7 @@ set -eu
 # --- Configuration -----------------------------------------------------------
 
 GITHUB_REPO="jpapiez/phrozenarco"
-BRANCH="main"
+BRANCH="dev"
 
 # --- Parse arguments ---------------------------------------------------------
 

@@ -248,11 +248,11 @@ Pre-built release zips are attached to each GitLab tag (see [Releases](https://g
 For developers with SSH access, you can install the latest dev branch directly over the network without building a release or using USB:
 
 ```sh
-wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/dev/kaos-filament-startup-guards/tools/dev_deploy.sh | sh
+wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/dev/tools/dev_deploy.sh | sh
 ```
 
 Options:
-- `--branch <name>` — install from a different branch (default: `dev/kaos-filament-startup-guards`)
+- `--branch <name>` — install from a different branch (default: `dev`)
 - `--download-only` — download and stage files without running the installer
 - `--whatif` — dry-run: show what would be installed without making changes
 

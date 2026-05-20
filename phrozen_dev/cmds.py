@@ -479,7 +479,7 @@ class Commands(Base):
         )
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+E:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("E", 0, self.G_ChangeChannelTimeoutNewChan)
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
         if chan in range(1, 5):
@@ -490,7 +490,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "Serial port 2 sending command: E%d" % (chan - 4), "SERIAL")
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+E:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("E", 1, self.G_ChangeChannelTimeoutNewChan)
 
     # Vendor note (240228): distance,needstm32distance
     # P1 G[n];n:1~32(device,1~4);distance Yes;====="G?";
@@ -500,7 +500,7 @@ class Commands(Base):
         )
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+G:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("G", 0, self.G_ChangeChannelTimeoutNewChan)
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
         if chan in range(1, 5):
@@ -511,7 +511,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "Serial port 2 sending command: G%d" % (chan - 4), "SERIAL")
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+G:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("G", 1, self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_P1HnSpecialInfila(self, chan, gcmd):
         self.kaos_log(
@@ -519,7 +519,7 @@ class Commands(Base):
         )
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+H:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("H", 0, self.G_ChangeChannelTimeoutNewChan)
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
         if chan in range(1, 5):
@@ -530,7 +530,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "Serial port 2 sending command: H%d" % (chan - 4), "SERIAL")
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+H:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("H", 1, self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_P1InExtrudeManualIn(self, value):
         command_string = """
@@ -554,7 +554,7 @@ class Commands(Base):
             "DEBUG", "[(cmds.python)Cmds_P1JnManualSpitFila]Sending command P1J?", "SERIAL"
         )
         self.kaos_log("DEBUG", "chan=%d;" % chan, "SERIAL")
-        self.G_PhrozenFluiddRespondInfo("+J:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("J", 0, self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
@@ -565,7 +565,7 @@ class Commands(Base):
             self.Cmds_AMSSerial2Send("J%d" % (chan - 4))
             self.kaos_log("DEBUG", "Serial port 2 sending command: J%d" % (chan - 4), "SERIAL")
 
-        self.G_PhrozenFluiddRespondInfo("+J:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("J", 1, self.G_ChangeChannelTimeoutNewChan)
 
     # =====P1 I[n];stm32need;====="I?";?-
     # I2,I3,I0idle
@@ -574,7 +574,7 @@ class Commands(Base):
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+I:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("I", 0, self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (0415): I2,I3
         if value > 0:
@@ -633,7 +633,7 @@ class Commands(Base):
         # self.Cmds_AMSSerial1Send("AT+IDLE")
         # self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_P1EnForceForward]Sending command: AT+IDLE; IDLE state")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+I:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("I", 1, self.G_ChangeChannelTimeoutNewChan)
 
     # P1 B?;filament
     def Cmds_P1BnWholeRollbackAction(self, chan, gcmd):
@@ -645,7 +645,7 @@ class Commands(Base):
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+B:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("B", 0, self.G_ChangeChannelTimeoutNewChan)
 
         if chan in range(1, 5):
             self.Cmds_AMSSerial1Send("B%d" % chan)
@@ -663,7 +663,7 @@ class Commands(Base):
                 self.Cmds_CutFilaIfNormalCheck()
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+B:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("B", 1, self.G_ChangeChannelTimeoutNewChan)
 
     # P1 D?;filament
     def Cmds_P1DnMoveToParkPositonAction(self, chan, gcmd):
@@ -675,7 +675,7 @@ class Commands(Base):
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+D:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("D", 0, self.G_ChangeChannelTimeoutNewChan)
 
         if chan in range(1, 5):
             self.Cmds_AMSSerial1Send("P%d" % chan)
@@ -693,7 +693,7 @@ class Commands(Base):
                 self.Cmds_CutFilaIfNormalCheck()
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+D:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("D", 1, self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_MoveToCutFilaPrepare(self):
         self.kaos_log(
@@ -741,7 +741,7 @@ class Commands(Base):
         )
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Cut:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Cut", 0, self.G_ChangeChannelTimeoutNewChan)
 
         # # Vendor note (231208): ,
         # # # 0=defaultgcodeexecute
@@ -809,7 +809,7 @@ class Commands(Base):
         # self.IfDoPG102Flag=True
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Cut:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Cut", 1, self.G_ChangeChannelTimeoutNewChan)
 
         # # Vendor note (231207): prevent,0.5;speed,
         # command = """
@@ -854,7 +854,7 @@ class Commands(Base):
         # time.sleep(1)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Cut:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Cut", 0, self.G_ChangeChannelTimeoutNewChan)
 
         # X Yposition,,return
         # // G91
@@ -900,7 +900,7 @@ class Commands(Base):
         # self.IfDoPG102Flag=True
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Cut:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Cut", 1, self.G_ChangeChannelTimeoutNewChan)
 
         # # Vendor note (231207): prevent,0.5;speed,
         # command = """
@@ -946,7 +946,7 @@ class Commands(Base):
         # time.sleep(1)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Cut:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Cut", 0, self.G_ChangeChannelTimeoutNewChan)
 
         # X Yposition,,return
         # // G91
@@ -991,7 +991,7 @@ class Commands(Base):
         # self.IfDoPG102Flag=True
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Cut:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Cut", 1, self.G_ChangeChannelTimeoutNewChan)
 
         # # Vendor note (231207): prevent,0.5;speed,
         # command = """
@@ -1032,7 +1032,7 @@ class Commands(Base):
             "SERIAL",
         )
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Zero:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Zero", 0, self.G_ChangeChannelTimeoutNewChan)
         # Vendor note (20231019): ,auto filament changeif1filament,needfilament
         # Vendor note (20231020): detect
         # if self.G_ToolheadIfHaveFilaFlag:
@@ -1051,7 +1051,7 @@ class Commands(Base):
         # G91
         # G1 E-0.385 F8000
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Zero:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Zero", 1, self.G_ChangeChannelTimeoutNewChan)
 
         self.kaos_log("DEBUG", "cut filament", "SERIAL")
 
@@ -1062,7 +1062,7 @@ class Commands(Base):
             "DEBUG", "[(cmds.python)Cmds_MoveToCutFilaAndHomingXY]cut filament;XYreset", "SERIAL"
         )
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Zero:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Zero", 0, self.G_ChangeChannelTimeoutNewChan)
         # Vendor note (20231019): ,auto filament changeif1filament,needfilament
         # Vendor note (20231020): detect
         # if self.G_ToolheadIfHaveFilaFlag:
@@ -1087,7 +1087,7 @@ class Commands(Base):
         # G91
         # G1 E-0.385 F8000
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+Zero:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("Zero", 1, self.G_ChangeChannelTimeoutNewChan)
 
         self.kaos_log("DEBUG", "cut filament", "SERIAL")
 
@@ -1738,15 +1738,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
@@ -1818,15 +1818,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
         self.kaos_log("DEBUG", "Current pause state-Lo_PauseStatus='%s'" % Lo_PauseStatus, "SERIAL")
@@ -1869,7 +1869,7 @@ class Commands(Base):
     def Cmds_PhrozenKlipperResume(self, gcmd):
         _ = gcmd
         self.kaos_log("DEBUG", "=====[(cmds.py)Cmds_PhrozenKlipperResume]", "SERIAL")
-        self.G_PhrozenFluiddRespondInfo("+RESUME:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_resume(1, self.G_ChangeChannelTimeoutNewChan)
         self.kaos_log("DEBUG", "=====RESUME=====", "SERIAL")
         self.kaos_log(
             "DEBUG",
@@ -1953,24 +1953,24 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:  # 0
             self.kaos_log("DEBUG", "in printingmode, do not executeresume,return", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
             return
 
         if self.PG102Flag == True:
             self.kaos_log("DEBUG", "normal in purge, not allowedresume", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
             return
 
         # # Vendor note (231216): # eventtime = self.G_PhrozenReactor.monotonic()
@@ -2012,7 +2012,7 @@ class Commands(Base):
         self.G_ChangeChannelResumeFlag = True
         # Vendor note (231207): P1 C?auto filament change,if,continue1start
         self.G_ChangeChannelFirstFilaFlag = True
-        # self.G_PhrozenFluiddRespondInfo("+RESUME:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        # self.emit_resume(1, self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (250812): single-color runout detection, return to pause zone
         self.G_RetryToPauseAreaFlag = False
@@ -2221,7 +2221,7 @@ class Commands(Base):
                                 self.G_PhrozenPrinterCancelPauseResume.send_pause_command()
                                 self.G_ProzenToolhead.wait_moves()
                                 self.G_KlipperIfPaused = True
-                                # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                                # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                                 self.G_PhrozenFluiddRespondInfo(
                                     "+PAUSE:4,%d,%d"
                                     % (
@@ -2249,7 +2249,7 @@ class Commands(Base):
                             self.G_PhrozenPrinterCancelPauseResume.send_pause_command()
                             self.G_ProzenToolhead.wait_moves()
                             self.G_KlipperIfPaused = True
-                            # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                            # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                             self.G_PhrozenFluiddRespondInfo(
                                 "+PAUSE:4,%d,%d"
                                 % (
@@ -2299,7 +2299,7 @@ class Commands(Base):
                 #         self.G_PhrozenFluiddRespondInfo("send_pause_command")
                 #         #no filament, continue pausing
                 #         self.G_KlipperIfPaused=True
-                #         self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                #         self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # else:
                 #     if self.G_ToolheadIfHaveFilaFlag==True:
                 #         self.G_PhrozenFluiddRespondInfo("Single-color M3 mode, no AMS, Klipper resume directly")
@@ -2312,7 +2312,7 @@ class Commands(Base):
                 #         self.G_PhrozenFluiddRespondInfo("send_pause_command")
                 #         #no filament, continue pausing
                 #         self.G_KlipperIfPaused=True
-                #         self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                #         self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 # filament required to resume print
                 if self.G_ToolheadIfHaveFilaFlag:
@@ -2495,7 +2495,7 @@ class Commands(Base):
                                 self.G_PhrozenPrinterCancelPauseResume.send_pause_command()
                                 self.G_ProzenToolhead.wait_moves()
                                 self.G_KlipperIfPaused = True
-                                # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                                # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                                 self.G_PhrozenFluiddRespondInfo(
                                     "+PAUSE:4,%d,%d"
                                     % (
@@ -2522,7 +2522,7 @@ class Commands(Base):
                         self.G_ProzenToolhead.wait_moves()
                         # no filament, continue pausing
                         self.G_KlipperIfPaused = True
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                        # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                         self.G_PhrozenFluiddRespondInfo(
                             "+PAUSE:b,%d,%d"
                             % (
@@ -2590,7 +2590,7 @@ class Commands(Base):
                         # # Vendor note (240125): encapsulated function
                         # self.Cmds_PhrozenKlipperResumeCommon()
                         # self.G_ChangeChannelResumeFlag=False
-                        # self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+                        # self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
                         # return
 
                     else:
@@ -2652,7 +2652,7 @@ class Commands(Base):
             #         self.G_PhrozenFluiddRespondInfo("send_pause_command")
             #         #no filament, continue pausing
             #         self.G_KlipperIfPaused=True
-            #         self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #         self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             #     # Vendor note (241106): #     #self.Cmds_CmdP8(gcmd)
             #     #self.Cmds_PhrozenKlipperResumeCommon()
@@ -2661,7 +2661,7 @@ class Commands(Base):
             #     self.G_M2MAModeResumeFlag=True
 
             #     self.G_ChangeChannelResumeFlag=False
-            #     self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
 
             #     return
             # #filamentneedre-feed
@@ -2699,7 +2699,7 @@ class Commands(Base):
             #         self.G_PhrozenFluiddRespondInfo("send_pause_command")
             #         #no filament, continue pausing
             #         self.G_KlipperIfPaused=True
-            #         self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #         self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             # filament required to resume print
             if self.G_ToolheadIfHaveFilaFlag:
@@ -2824,7 +2824,7 @@ class Commands(Base):
                             self.G_ProzenToolhead.wait_moves()
                             # no filament, continue pausing
                             self.G_KlipperIfPaused = True
-                            # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                            # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                             self.G_PhrozenFluiddRespondInfo(
                                 "+PAUSE:4,%d,%d"
                                 % (
@@ -2963,7 +2963,7 @@ class Commands(Base):
                             self.G_PhrozenPrinterCancelPauseResume.send_pause_command()
                             self.G_ProzenToolhead.wait_moves()
                             self.G_KlipperIfPaused = True
-                            # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                            # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                             self.G_PhrozenFluiddRespondInfo(
                                 "+PAUSE:4,%d,%d"
                                 % (
@@ -2987,7 +2987,7 @@ class Commands(Base):
                     self.G_PhrozenPrinterCancelPauseResume.send_pause_command()
                     self.G_ProzenToolhead.wait_moves()
                     self.G_KlipperIfPaused = True
-                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                    # self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
                     self.G_PhrozenFluiddRespondInfo(
                         "+PAUSE:4,%d,%d"
                         % (
@@ -3041,7 +3041,7 @@ class Commands(Base):
             #             self.G_PhrozenFluiddRespondInfo("send_pause_command")
             #             #no filament, continue pausing
             #             self.G_KlipperIfPaused=True
-            #             self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #             self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
             #     else:
             #         self.G_PhrozenFluiddRespondInfo("Standalone M3 mode, no AMS, toolhead has filament, resuming")
             #         # # Vendor note (240411): manual extrude then resume
@@ -3085,7 +3085,7 @@ class Commands(Base):
             #     # self.Cmds_PhrozenKlipperResumeCommon()
 
             #     self.G_ChangeChannelResumeFlag=False
-            #     self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #     self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
 
             #     return
 
@@ -3130,7 +3130,7 @@ class Commands(Base):
             #             self.G_PhrozenFluiddRespondInfo("send_pause_command")
             #             #no filament, continue pausing
             #             self.G_KlipperIfPaused=True
-            #             self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #             self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             #     else:
             #         self.G_PhrozenFluiddRespondInfo("Standalone M3 mode, no AMS, toolhead no filament, pausing, please load manually")
@@ -3138,7 +3138,7 @@ class Commands(Base):
             #         self.G_PhrozenFluiddRespondInfo("send_pause_command")
             #         #no filament, continue pausing
             #         self.G_KlipperIfPaused=True
-            #         self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+            #         self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             # filament required to resume print
             if self.G_ToolheadIfHaveFilaFlag:
@@ -3270,7 +3270,7 @@ class Commands(Base):
                             self.G_PhrozenPrinterCancelPauseResume.send_pause_command()
                             self.G_ProzenToolhead.wait_moves()
                             self.G_KlipperIfPaused = True
-                            # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                            # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                             self.G_PhrozenFluiddRespondInfo(
                                 "+PAUSE:4,%d,%d"
                                 % (
@@ -3414,7 +3414,7 @@ class Commands(Base):
                             self.G_ProzenToolhead.wait_moves()
                             # no filament, continue pausing
                             self.G_KlipperIfPaused = True
-                            # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                            # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                             self.G_PhrozenFluiddRespondInfo(
                                 "+PAUSE:4,%d,%d"
                                 % (
@@ -3440,7 +3440,7 @@ class Commands(Base):
                     self.G_ProzenToolhead.wait_moves()
                     # no filament, continue pausing
                     self.G_KlipperIfPaused = True
-                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                    # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                     self.G_PhrozenFluiddRespondInfo(
                         "+PAUSE:b,%d,%d"
                         % (
@@ -3454,7 +3454,7 @@ class Commands(Base):
                     )
 
             # self.G_ChangeChannelResumeFlag=False
-            # self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+            # self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
 
             return
 
@@ -3678,7 +3678,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("send_pause_command")
         # [Translated vendor note] #filamentpause
         # self.G_KlipperIfPaused=True
-        # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+        # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         self.kaos_log("DEBUG", "Current pause state-Lo_PauseStatus='%s'" % Lo_PauseStatus, "SERIAL")
         self.kaos_log(
@@ -3731,7 +3731,7 @@ class Commands(Base):
 
                 self.G_ProzenToolhead.dwell(1)
                 self.G_ChangeChannelResumeFlag = False
-                self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
             else:
                 self.kaos_log("DEBUG", "successful, can resume number data", "SERIAL")
 
@@ -3749,7 +3749,7 @@ class Commands(Base):
 
                 self.G_ProzenToolhead.dwell(1)
                 self.G_ChangeChannelResumeFlag = False
-                self.G_PhrozenFluiddRespondInfo("+RESUME:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_resume(0, self.G_ChangeChannelTimeoutNewChan)
 
         # filament
         else:
@@ -3766,7 +3766,7 @@ class Commands(Base):
 
                 self.G_ProzenToolhead.dwell(1)
                 self.G_ChangeChannelResumeFlag = False
-                self.G_PhrozenFluiddRespondInfo("+RESUME:2,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_resume(2, self.G_ChangeChannelTimeoutNewChan)
 
             else:
                 self.kaos_log("DEBUG", "successful, can resume number data", "SERIAL")
@@ -3787,10 +3787,10 @@ class Commands(Base):
                 # if len(self.G_PauseToLCDString)==0:
                 #     # Vendor note (0429): prevent
                 #     #self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
-                #     self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                #     self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
                 self.G_ProzenToolhead.dwell(1)
                 self.G_ChangeChannelResumeFlag = False
-                self.G_PhrozenFluiddRespondInfo("+RESUME:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_resume(0, self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (250102): ,enable,prevent
         # self.G_ProzenToolhead.dwell(0.5)
@@ -3850,7 +3850,7 @@ class Commands(Base):
 
         if self.PG102Flag == True:
             self.kaos_log("DEBUG", "purge, pause", "SERIAL")
-            # self.G_PhrozenFluiddRespondInfo("+PAUSE:10,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+            # self.emit_protocol("+PAUSE:10,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
             return
 
         # Vendor note (231228): MCallowZ
@@ -3985,7 +3985,7 @@ class Commands(Base):
         self.kaos_log("DEBUG", "[SERVICE] End external macro: command=%s" % (command), "SERIAL")
 
         self.kaos_log("DEBUG", "disable or fluidd network move pause, pause", "SERIAL")
-        # self.G_PhrozenFluiddRespondInfo("+PAUSE:10,%d" % self.G_ChangeChannelTimeoutNewChan)
+        # self.emit_protocol("+PAUSE:10,%d" % self.G_ChangeChannelTimeoutNewChan)
         self.G_PhrozenFluiddRespondInfo(
             "+PAUSE:10,%d,%d"
             % (self.G_ChangeChannelTimeoutOldChan, self.G_ChangeChannelTimeoutNewChan)
@@ -3997,7 +3997,7 @@ class Commands(Base):
             "DEBUG", "[(cmds.python)Cmds_PhrozenKlipperCancel]klipper cancelprinting;", "SERIAL"
         )
 
-        self.G_PhrozenFluiddRespondInfo("+CANCEL:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+CANCEL:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         self.kaos_log("DEBUG", "=====CANCEL=====", "SERIAL")
         self.kaos_log(
@@ -4168,7 +4168,7 @@ class Commands(Base):
 
         self.G_AMSDeviceWorkMode = AMS_WORK_MODE_UNKNOW
 
-        self.G_PhrozenFluiddRespondInfo("+CANCEL:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+CANCEL:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_USBConnectErrorCheck(self):
         self.kaos_log("DEBUG", "[(cmds.python)Cmds_USBConnectErrorCheck]", "SERIAL")
@@ -4176,15 +4176,15 @@ class Commands(Base):
         self.kaos_log("DEBUG", "self.G_CancelFlag='%s'" % self.G_CancelFlag, "SERIAL")
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         try:
             self.kaos_log(
@@ -4348,8 +4348,8 @@ class Commands(Base):
             if self.STM32ReprotPauseFlag == 1:
                 self.kaos_log("DEBUG", "already pause, do notpause", "SERIAL")
                 self.kaos_log("DEBUG", "toolhead cutter or device error, pause", "SERIAL")
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutOldChan)
-                # Vendor note (250414): #self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                # self.emit_protocol("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutOldChan)
+                # Vendor note (250414): #self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
 
                 # Vendor note (250619): check if AMS reconnected successfully
                 self.Cmds_USBConnectErrorCheck()
@@ -4387,7 +4387,7 @@ class Commands(Base):
                             "DEBUG", "serial port 2 send AT+PAUSEpausestm32 machine", "SERIAL"
                         )
 
-                    # Vendor note (250805): #self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    # Vendor note (250805): #self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     if len(self.G_PauseToLCDString) == 0:
                         self.G_PhrozenFluiddRespondInfo(
                             "+PAUSE:8,%d,%d"
@@ -4418,7 +4418,7 @@ class Commands(Base):
                             "DEBUG", "serial port 2 send AT+PAUSEpausestm32 machine", "SERIAL"
                         )
 
-                    # Vendor note (250805): #self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    # Vendor note (250805): #self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     if len(self.G_PauseToLCDString) == 0:
                         self.G_PhrozenFluiddRespondInfo(
                             "+PAUSE:8,%d,%d"
@@ -4454,11 +4454,11 @@ class Commands(Base):
                             "SERIAL",
                         )
 
-                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutOldChan)
+                    # self.emit_protocol("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutOldChan)
                     # Vendor note (250619): check if AMS reconnected successfully
                     self.Cmds_USBConnectErrorCheck()
 
-                    # Vendor note (250414): #self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    # Vendor note (250414): #self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     if len(self.G_PauseToLCDString) == 0:
                         self.G_PhrozenFluiddRespondInfo(
                             "+PAUSE:8,%d,%d"
@@ -4533,10 +4533,10 @@ class Commands(Base):
             self.G_ChangeChannelFirstFilaFlag = True
 
             # # Vendor note (250308): already,
-            # #self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutNewChan)
-            # #self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+            # #self.emit_protocol("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutNewChan)
+            # #self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
             # if len(self.G_PauseToLCDString)==0:
-            #     self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+            #     self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
             # else:
             #     self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
 
@@ -4570,7 +4570,7 @@ class Commands(Base):
             self.G_MCModeCanResumeFlag = False
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+T:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             if len(self.G_PauseToLCDString) == 0:
                 self.G_PhrozenFluiddRespondInfo(
@@ -4600,7 +4600,7 @@ class Commands(Base):
                 "SERIAL",
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+T:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         elif self.G_ChangeChannelTimeoutNewChan in range(5, 9):
             self.Cmds_AMSSerial2Send("T%d" % self.G_ChangeChannelTimeoutNewChan - 4)
             self.kaos_log(
@@ -4608,7 +4608,7 @@ class Commands(Base):
                 "serial port 2Sending command: T%d" % self.G_ChangeChannelTimeoutNewChan - 4,
                 "SERIAL",
             )
-            self.G_PhrozenFluiddRespondInfo("+T:0,%d" % self.G_ChangeChannelTimeoutNewChan - 4)
+            self.emit_protocol("+T:0,%d" % self.G_ChangeChannelTimeoutNewChan - 4)
 
         if self.ManualCmdFlag == True:
             self.kaos_log(
@@ -4919,15 +4919,15 @@ class Commands(Base):
 
             self.kaos_log("DEBUG", "Current mode", "SERIAL")
             if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                self.emit_mode(0, "unkown")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                self.emit_mode(1, "MC")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                self.emit_mode(2, "MA")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                self.emit_mode(3, "RUNOUT")
             else:
-                self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                self.emit_mode(-1, "error")
 
             Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
             self.kaos_log(
@@ -5254,7 +5254,7 @@ class Commands(Base):
                         )
                     )
                     # for UIUX dynamic interface
-                    self.G_PhrozenFluiddRespondInfo("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                    self.emit_protocol("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                     # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
 
@@ -5280,7 +5280,7 @@ class Commands(Base):
                     if self.G_PauseTriggerWhileChangeChannelFlag == True:
                         # Vendor note (231209): handling business in timer causes errors; use thread for interrupt later
                         self.kaos_log("DEBUG", "purge, STM32 send pause", "SERIAL")
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                        # self.emit_protocol("+PAUSE:1,%d" % self.G_ChangeChannelTimeoutNewChan)
                         # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                         if len(self.G_PauseToLCDString) == 0:
                             self.G_PhrozenFluiddRespondInfo(
@@ -5332,7 +5332,7 @@ class Commands(Base):
 
             self.G_ResumeProcessCheckPauseStatus = False
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+T:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             # Vendor note (250607): print status: 1=retracting; 2=feeding; 3=printing; 4=paused
             self.G_KlipperPrintStatus = 3
@@ -5377,7 +5377,7 @@ class Commands(Base):
                         self.G_ChangeChannelFirstFilaFlag = True
 
                         self.kaos_log("DEBUG", "timeout60s, pause", "SERIAL")
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                        # self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
 
                         if self.G_SerialPort1OpenFlag == True:
                             # Vendor note (240603): preventAMS
@@ -5423,9 +5423,9 @@ class Commands(Base):
                 self.kaos_log("DEBUG", "already pause, do notpause", "SERIAL")
                 # Vendor note (240509): # # Vendor note (240326): # #self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                 # if len(self.G_PauseToLCDString)==0:
-                #     self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                #     self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (240417): preventstm32G_PauseToLCDString
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (240325): filament changefailed,cannotexecute
                 self.G_MCModeCanResumeFlag = False
                 # Vendor note (250527): execute
@@ -5486,7 +5486,7 @@ class Commands(Base):
 
             self.G_ResumeProcessCheckPauseStatus = False
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+T:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             # Vendor note (250607): print status: 1=retracting; 2=feeding; 3=printing; 4=paused
             self.G_KlipperPrintStatus = -1
@@ -5563,15 +5563,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # unlock
         # [Translated vendor note] self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_P1TnManualChangeChannel]filament change, XY0")
@@ -5611,15 +5611,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # Vendor note (250526): ,allowgcode,complete
         if self.G_KlipperInPausing == True:
@@ -5824,7 +5824,7 @@ class Commands(Base):
         # self.G_ProzenToolhead.dwell(2.0)
 
         self.G_PauseTriggerWhileChangeChannelFlag = False
-        self.G_PhrozenFluiddRespondInfo("+C:0,%d" % chan)
+        self.emit_protocol("+C:0,%d" % chan)
 
         self.G_ASM1DisconnectErrorCount = 0
 
@@ -5835,7 +5835,7 @@ class Commands(Base):
         #     if self.G_PauseTriggerWhileChangeChannelFlag==True:
         #         self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_P1CnAutoChangeChannel]G? command detected pause report, continue pausing")
         #         # Vendor note (240325): for continuous screen tap after runout without removal, use pause=1
-        #         #self.G_PhrozenFluiddRespondInfo("+PAUSE:1,%d" % self.G_Pause1Channel)
+        #         #self.emit_protocol("+PAUSE:1,%d" % self.G_Pause1Channel)
         #         if "+PAUSE:1" in self.G_PauseToLCDString:
         #             self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
         #         #else:
@@ -5843,7 +5843,7 @@ class Commands(Base):
         #         self.G_ChangeChannelFirstFilaFlag=True
         #         self.G_IfChangeFilaOngoing= False
         #         # Vendor note (240524): for UIUX dynamic interface
-        #         self.G_PhrozenFluiddRespondInfo("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        #         self.emit_protocol("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
         #         return
         #     else:
         #         self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_P1CnAutoChangeChannel]G? command no pause report, need feed and resume")
@@ -5902,7 +5902,7 @@ class Commands(Base):
                 self.Cmds_USBConnectErrorCheck()
                 if self.G_ChangeChannelTimeoutOldChan in range(1, 5):  # 1 2 3 4
                     # # Vendor note (241011): filament changebeforeAMSexecutedistance,executePG101;
-                    self.G_PhrozenFluiddRespondInfo("+H:0,%d" % self.G_ChangeChannelTimeoutOldChan)
+                    self.emit_channel_op("H", 0, self.G_ChangeChannelTimeoutOldChan)
                     self.Cmds_AMSSerial1Send("H%d" % self.G_ChangeChannelTimeoutOldChan)
                     self.kaos_log(
                         "DEBUG",
@@ -5910,7 +5910,7 @@ class Commands(Base):
                         "SERIAL",
                     )
                     self.kaos_log("DEBUG", "serial port 1 before AMSretract", "SERIAL")
-                    self.G_PhrozenFluiddRespondInfo("+H:1,%d" % self.G_ChangeChannelTimeoutOldChan)
+                    self.emit_channel_op("H", 1, self.G_ChangeChannelTimeoutOldChan)
                 elif self.G_ChangeChannelTimeoutOldChan in range(5, 9):  # 5 6 7 8
                     self.G_PhrozenFluiddRespondInfo(
                         "+H:0,%d" % self.G_ChangeChannelTimeoutOldChan - 4
@@ -6180,7 +6180,7 @@ class Commands(Base):
             self.Cmds_USBConnectErrorCheck()
             if self.G_ChangeChannelTimeoutOldChan in range(1, 5):
                 # # Vendor note (241011): filament changebeforeAMSexecutedistance,executePG101;
-                self.G_PhrozenFluiddRespondInfo("+H:0,%d" % self.G_ChangeChannelTimeoutOldChan)
+                self.emit_channel_op("H", 0, self.G_ChangeChannelTimeoutOldChan)
                 self.Cmds_AMSSerial1Send("H%d" % self.G_ChangeChannelTimeoutOldChan)
                 self.kaos_log(
                     "DEBUG",
@@ -6188,17 +6188,17 @@ class Commands(Base):
                     "SERIAL",
                 )
                 self.kaos_log("DEBUG", "serial port 1 before AMSretract", "SERIAL")
-                self.G_PhrozenFluiddRespondInfo("+H:1,%d" % self.G_ChangeChannelTimeoutOldChan)
+                self.emit_channel_op("H", 1, self.G_ChangeChannelTimeoutOldChan)
             elif self.G_ChangeChannelTimeoutOldChan in range(5, 9):
-                self.G_PhrozenFluiddRespondInfo("+H:0,%d" % self.G_ChangeChannelTimeoutOldChan - 4)
-                self.Cmds_AMSSerial2Send("H%d" % self.G_ChangeChannelTimeoutOldChan - 4)
+                self.emit_channel_op("H", 0, self.G_ChangeChannelTimeoutOldChan - 4)
+                self.Cmds_AMSSerial2Send("H%d" % (self.G_ChangeChannelTimeoutOldChan - 4))
                 self.kaos_log(
                     "DEBUG",
-                    "serial port 2Sending command: H%d" % self.G_ChangeChannelTimeoutOldChan - 4,
+                    "serial port 2Sending command: H%d" % (self.G_ChangeChannelTimeoutOldChan - 4),
                     "SERIAL",
                 )
                 self.kaos_log("DEBUG", "serial port 2 before AMSretract", "SERIAL")
-                self.G_PhrozenFluiddRespondInfo("+H:1,%d" % self.G_ChangeChannelTimeoutOldChan - 4)
+                self.emit_channel_op("H", 1, self.G_ChangeChannelTimeoutOldChan - 4)
             else:
                 self.kaos_log("DEBUG", "error, all filament", "SERIAL")
                 if self.G_SerialPort1OpenFlag == True:
@@ -6364,8 +6364,8 @@ class Commands(Base):
                     self.G_ProzenToolhead.dwell(1.0)
 
                     self.kaos_log("DEBUG", "toolhead cutter or device error, pause", "SERIAL")
-                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutOldChan)
-                    # Vendor note (250414): #self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    # self.emit_protocol("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutOldChan)
+                    # Vendor note (250414): #self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     if len(self.G_PauseToLCDString) == 0:
                         self.G_PhrozenFluiddRespondInfo(
                             "+PAUSE:8,%d,%d"
@@ -6515,8 +6515,8 @@ class Commands(Base):
                 self.G_ChangeChannelFirstFilaFlag = True
 
                 # Vendor note (250308): already,
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutNewChan)
-                # self.G_PhrozenFluiddRespondInfo("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                # self.emit_protocol("+PAUSE:8,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+PAUSE:8,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
 
                 if self.G_SerialPort1OpenFlag == True:
                     # Vendor note (240603): preventAMS
@@ -6558,7 +6558,7 @@ class Commands(Base):
                     self.kaos_log("DEBUG", self.G_PauseToLCDString, "SERIAL")
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 self.kaos_log("DEBUG", "return", "SERIAL")
                 return
@@ -6723,15 +6723,15 @@ class Commands(Base):
 
                     self.kaos_log("DEBUG", "Current mode", "SERIAL")
                     if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                        self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                        self.emit_mode(0, "unkown")
                     elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                        self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                        self.emit_mode(1, "MC")
                     elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                        self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                        self.emit_mode(2, "MA")
                     elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                        self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                        self.emit_mode(3, "RUNOUT")
                     else:
-                        self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                        self.emit_mode(-1, "error")
 
                     Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
                     self.kaos_log(
@@ -7051,7 +7051,7 @@ class Commands(Base):
                         return
 
                         # Vendor note (240326): during,1
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                        # self.emit_protocol("+PAUSE:1,%d" % self.G_ChangeChannelTimeoutNewChan)
                     else:
                         self.kaos_log("DEBUG", "purge normal normal, enterprinting", "SERIAL")
                         # Vendor note (250527): filament changesuccessfulgocde
@@ -7081,7 +7081,7 @@ class Commands(Base):
                 self.G_ProzenToolhead.dwell(1.5)
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 # Vendor note (250607): print status: 1=retracting; 2=feeding; 3=printing; 4=paused
                 self.G_KlipperPrintStatus = 3
@@ -7159,11 +7159,11 @@ class Commands(Base):
                         # klipper active pause
                         self.Cmds_PhrozenKlipperPause(None)
                         self.G_KlipperIfPaused = True
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                        # self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                         self.kaos_log("DEBUG", "timeout60s, pause", "SERIAL")
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                        # self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                        # self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                         if len(self.G_PauseToLCDString) == 0:
                             self.G_PhrozenFluiddRespondInfo(
                                 "+PAUSE:4,%d,%d"
@@ -7185,14 +7185,14 @@ class Commands(Base):
                 else:
                     self.kaos_log("DEBUG", "already pause, do notpause", "SERIAL")
                     # # Vendor note (250529): # if len(self.G_PauseToLCDString)==0:
-                    #     self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #     self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     # else:
                     #     self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
 
                     # self.G_PhrozenFluiddRespondInfo(self.G_PauseToLCDString)
                     # Vendor note (240417): preventstm32G_PauseToLCDString
                     # if len(self.G_PauseToLCDString)==0:
-                    #    self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #    self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     if len(self.G_PauseToLCDString) == 0:
                         self.G_PhrozenFluiddRespondInfo(
                             "+PAUSE:4,%d,%d"
@@ -7212,7 +7212,7 @@ class Commands(Base):
                         self.kaos_log("DEBUG", "serial port 2-AT+PAUSEpausestm32 machine", "SERIAL")
                     # Vendor note (240429): ifstm32,need
                     # if self.G_ResumeProcessCheckPauseStatus==False:
-                    #     self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                    #     self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                     if self.G_ResumeProcessCheckPauseStatus == False:
                         self.kaos_log(
@@ -7220,7 +7220,7 @@ class Commands(Base):
                             "AMS has up report pause, klipper pause, need to up report pause",
                             "SERIAL",
                         )
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                        # self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                         if len(self.G_PauseToLCDString) == 0:
                             self.G_PhrozenFluiddRespondInfo(
                                 "+PAUSE:4,%d,%d"
@@ -7261,7 +7261,7 @@ class Commands(Base):
                 self.G_IfChangeFilaOngoing = False
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+C:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 # Vendor note (250607): print status: 1=retracting; 2=feeding; 3=printing; 4=paused
                 self.G_KlipperPrintStatus = -1
@@ -7425,7 +7425,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T0:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T0:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
@@ -7469,7 +7469,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T0:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T0:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT1(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT1 +1]orcaAMS", "SERIAL")
@@ -7568,7 +7568,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T1:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T1:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -7611,7 +7611,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T1:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T1:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT2(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT2 +1]orcaAMS", "SERIAL")
@@ -7696,7 +7696,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T2:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T2:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -7738,7 +7738,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T2:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T2:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT3(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT3 +1]orcaAMS", "SERIAL")
@@ -7822,7 +7822,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T3:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T3:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -7864,7 +7864,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T3:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T3:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT4(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT4 +1]orcaAMS", "SERIAL")
@@ -7949,7 +7949,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T4:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T4:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -7973,7 +7973,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #2 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #2 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T4:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T4:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -7999,7 +7999,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T4:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T4:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT5(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT5 +1]orcaAMS", "SERIAL")
@@ -8084,7 +8084,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T5:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T5:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -8108,7 +8108,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #2 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #2 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T5:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T5:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -8134,7 +8134,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T5:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T5:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT6(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT6 +1]orcaAMS", "SERIAL")
@@ -8219,7 +8219,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T6:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T6:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -8243,7 +8243,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #2 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #2 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T6:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T6:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -8279,7 +8279,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T6:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T6:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT7(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT7 +1]orcaAMS", "SERIAL")
@@ -8375,7 +8375,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T7:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T7:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -8399,7 +8399,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #2 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #2 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T7:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T7:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -8435,7 +8435,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T7:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T7:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT8(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT8 +1]orcaAMS", "SERIAL")
@@ -8531,7 +8531,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T8:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T8:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -8555,7 +8555,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #3 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #3 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T8:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T8:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -8591,7 +8591,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T8:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T8:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT9(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT9 +1]orcaAMS", "SERIAL")
@@ -8686,7 +8686,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T9:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T9:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -8710,7 +8710,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #3 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #3 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T9:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T9:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -8746,7 +8746,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T9:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T9:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT10(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT10 +1]orcaAMS", "SERIAL")
@@ -8842,7 +8842,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T10:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T10:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -8866,7 +8866,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #3 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #3 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T10:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T10:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -8902,7 +8902,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T10:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T10:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT11(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT11 +1]orcaAMS", "SERIAL")
@@ -8998,7 +8998,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T11:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T11:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -9022,7 +9022,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #3 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #3 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -9058,7 +9058,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT12(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT12 +1]orcaAMS", "SERIAL")
@@ -9154,7 +9154,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T12:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T12:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -9178,7 +9178,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #4 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #4 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -9214,7 +9214,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT13(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT13 +1]orcaAMS", "SERIAL")
@@ -9310,7 +9310,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T13:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T13:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -9334,7 +9334,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #4 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #4 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T13:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T13:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -9370,7 +9370,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T13:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T13:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT14(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT14 +1]orcaAMS", "SERIAL")
@@ -9466,7 +9466,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T14:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T14:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -9490,7 +9490,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #4 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #4 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T14:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T14:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -9526,7 +9526,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T14:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T14:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     def Cmds_CmdT15(self, gcmd):
         self.kaos_log("DEBUG", "=====[(cmds.python)Cmds_CmdT15 +1]orcaAMS", "SERIAL")
@@ -9610,7 +9610,7 @@ class Commands(Base):
         # self.G_PhrozenFluiddRespondInfo("command='%s'; Automatic filament change" % (gcmd.get_commandline(),))
         self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T15:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T15:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         # #cancel
         # self.G_PhrozenPrinterCancelPauseResume.cmd_CANCEL_PRINT(None)
         Lo_PauseStatus = self.G_PhrozenPrinterCancelPauseResume.get_status(None)
@@ -9634,7 +9634,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "has #4 AMS, command", "SERIAL")
         else:
             self.kaos_log("DEBUG", "has #4 AMS, do not executecommand", "SERIAL")
-            self.G_PhrozenFluiddRespondInfo("+T15:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+T15:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (241030): P1 C1P1 C32,132
@@ -9670,7 +9670,7 @@ class Commands(Base):
             self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+T15:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+T15:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
     # PRZ_VERSION query
     def Cmds_PhrozenVersion(self, gcmd):
@@ -9693,15 +9693,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         self.kaos_log("DEBUG", "%s" % (gcmd.get_commandline(),), "SERIAL")
         # # Vendor note (240224): # command = """
@@ -10003,13 +10003,13 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         # [Translated vendor note] Vendor note (241030): P1 C1P1 C32, 132
         # [Translated vendor note] 1: 1 2 3 4
         # [Translated vendor note] 2: 5 6 7 8
@@ -10022,7 +10022,7 @@ class Commands(Base):
         # [Translated vendor note] filament change
 
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         self.kaos_log("DEBUG", "self.G_P0M3Flag=%d" % (self.G_P0M3Flag), "SERIAL")
         self.kaos_log("DEBUG", "self.G_KlipperIfPaused=%d" % (self.G_KlipperIfPaused), "SERIAL")
@@ -10350,15 +10350,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # PRZ_PwrDownResumePrint
         try:
@@ -10594,10 +10594,10 @@ class Commands(Base):
 
             self.kaos_log("DEBUG", "Current mode", "SERIAL")
             if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                self.emit_mode(0, "unkown")
 
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                self.emit_mode(1, "MC")
                 # Vendor note (250607): print status: 1=retracting; 2=feeding; 3=printing; 4=paused
                 # self.G_KlipperPrintStatus = 3
                 if self.G_SerialPort1OpenFlag == False and self.G_SerialPort2OpenFlag == False:
@@ -10631,7 +10631,7 @@ class Commands(Base):
                         )
 
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                self.emit_mode(2, "MA")
                 self.G_P0M2MAStartPrintFlag = 1
                 # self.G_ToolheadFirstInputFila=False
                 # self.P0M3FilaRunoutSpittingFinished=True
@@ -10729,8 +10729,8 @@ class Commands(Base):
                     #         if self.G_KlipperIfPaused == False:
                     #             self.Cmds_PhrozenKlipperPauseMAToSTM32(None)
                     #             self.G_KlipperIfPaused=True
-                    #             #self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
-                    #             self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #             #self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                    #             self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #         else:
                     #             self.G_PhrozenFluiddRespondInfo("already pause, do notpause")
                     # else:
@@ -10741,12 +10741,12 @@ class Commands(Base):
                     #     self.G_KlipperIfPaused=True
                     #     # Vendor note (250521): AMS multi-material present
                     #     #if self.G_AMSDevice1IfNormal==True or self.G_AMSDevice2IfNormal==True:
-                    #     self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #     self.emit_protocol("+PAUSE:4,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #     #else:
-                    #     #self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #     #self.emit_protocol("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
 
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                self.emit_mode(3, "RUNOUT")
                 self.G_P0M3Flag = True
                 # self.G_ToolheadFirstInputFila = True
                 # Vendor note (240415): filament,
@@ -10845,8 +10845,8 @@ class Commands(Base):
                     #         if self.G_KlipperIfPaused == False:
                     #             self.Cmds_PhrozenKlipperPauseMAToSTM32(None)
                     #             self.G_KlipperIfPaused=True
-                    #             #self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
-                    #             self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #             #self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                    #             self.emit_protocol("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #         else:
                     #             self.G_PhrozenFluiddRespondInfo("already pause, do notpause")
                     # else:
@@ -10857,12 +10857,12 @@ class Commands(Base):
                     #     self.G_KlipperIfPaused=True
                     #     # Vendor note (250521): AMS multi-material present
                     #     #if self.G_AMSDevice1IfNormal==True or self.G_AMSDevice2IfNormal==True:
-                    #     self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #     self.emit_protocol("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
                     #     #else:
-                    #     #self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
+                    #     #self.emit_protocol("+PAUSE:b,%d,%d" % (self.G_ChangeChannelTimeoutOldChan,self.G_ChangeChannelTimeoutNewChan))
 
             else:
-                self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                self.emit_mode(-1, "error")
 
         except:
             self.kaos_log("DEBUG", "except", "SERIAL")
@@ -11026,7 +11026,7 @@ class Commands(Base):
                     # klipper active pause
                     self.Cmds_PhrozenKlipperPauseM2M3ToSTM32(None)
 
-                    # self.G_PhrozenFluiddRespondInfo("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
+                    # self.emit_protocol("+PAUSE:4,%d" % self.G_ChangeChannelTimeoutNewChan)
                     self.G_PhrozenFluiddRespondInfo(
                         "+PAUSE:4,%d,%d"
                         % (
@@ -11091,19 +11091,19 @@ class Commands(Base):
             "SERIAL",
         )
 
-        # Vendor note (240510): self.G_PhrozenFluiddRespondInfo("+P114:0")
+        # Vendor note (240510): self.emit_protocol("+P114:0")
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # unlock
         self.Base_AMSSerialCmdUnlock()
@@ -11215,7 +11215,7 @@ class Commands(Base):
         #     # # response data JSON conversion
         #     # self.G_PhrozenFluiddRespondInfo(json.dumps(Lo_AMSSimpleState))
 
-        #     self.G_PhrozenFluiddRespondInfo("+P114:1")
+        #     self.emit_protocol("+P114:1")
         #     #self.G_P114RunFlag=0
         #     return
 
@@ -11237,7 +11237,7 @@ class Commands(Base):
 
         # if len(Lo_AMSDeviceStateRspInfo) != sizeof(AMSDetailInfoBytes):
         #     self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_CmdP114]AMS,checkAMS '%s'" % (gcmd.get_commandline(),))
-        #     # Vendor note (240510): #     self.G_PhrozenFluiddRespondInfo("+P114:-1")
+        #     # Vendor note (240510): #     self.emit_protocol("+P114:-1")
         #     #self.G_P114RunFlag=0
         #     # Vendor note (240412): AMSlabel
         #     self.G_AMSDevice1IfNormal=False
@@ -11276,7 +11276,7 @@ class Commands(Base):
         # time.sleep(1)
         # Vendor note (240229): cannottime.sleep,time to close
         # self.G_ProzenToolhead.dwell(0.5)
-        # Vendor note (240510): #self.G_PhrozenFluiddRespondInfo("+P114:1")
+        # Vendor note (240510): #self.emit_protocol("+P114:1")
         # self.G_P114RunFlag=False
 
         self.G_P114RunFlag = 1
@@ -11809,15 +11809,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # unlock
         self.Base_AMSSerialCmdUnlock()
@@ -11869,7 +11869,7 @@ class Commands(Base):
                 self.kaos_log("DEBUG", "P28 serial port 1 already open", "SERIAL")
                 # self.G_PhrozenFluiddRespondInfo("V-H%s-I%s-F%s" % (HW_VERSION,IMAGE_VERSION,FW_VERSION))
                 # # Vendor note (240104): return
-                # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:0")
+                # self.emit_protocol("+AMSCONNECT:0")
 
                 # self.G_SerialPort1Obj.flushInput()  # clean serial write cache
                 # self.G_SerialPort1Obj.flush()
@@ -11920,7 +11920,7 @@ class Commands(Base):
                 #         self.G_PhrozenFluiddRespondInfo("Serial port 2 already open, continue")
                 #     else:
                 #         self.G_PhrozenFluiddRespondInfo("V-H%s-I%s-F%s" % (HW_VERSION,IMAGE_VERSION,FW_VERSION))
-                #         self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:0")
+                #         self.emit_protocol("+AMSCONNECT:0")
                 #         #return
                 #         return
                 self.G_SerialPortHaveOpenedCount = self.G_SerialPortHaveOpenedCount + 1
@@ -11934,7 +11934,7 @@ class Commands(Base):
                 )
 
                 # self.G_PhrozenFluiddRespondInfo("V-H%s-I%s-F%s" % (HW_VERSION,IMAGE_VERSION,FW_VERSION))
-                # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:0")
+                # self.emit_protocol("+AMSCONNECT:0")
 
                 self.G_ProzenToolhead.dwell(0.5)
 
@@ -11968,7 +11968,7 @@ class Commands(Base):
             self.G_PhrozenFluiddRespondInfo(
                 "V-H%s-I%s-F%s" % (HW_VERSION, IMAGE_VERSION, FW_VERSION)
             )
-            self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:0")
+            self.emit_protocol("+AMSCONNECT:0")
 
             if self.G_SerialPort1OpenFlag == True:
                 # Vendor note (240524): readAMS16HUB
@@ -12109,25 +12109,25 @@ class Commands(Base):
                 self.G_SerialPortIsOpenCount = self.G_SerialPortIsOpenCount + 1
 
                 # self.G_PhrozenFluiddRespondInfo("V-H%s-I%s-F%s" % (HW_VERSION,IMAGE_VERSION,FW_VERSION))
-                # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:0")
+                # self.emit_protocol("+AMSCONNECT:0")
 
             else:
                 self.kaos_log("DEBUG", "serial port 1 #1 time openfailed", "SERIAL")
-                # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:1")
+                # self.emit_protocol("+AMSCONNECT:1")
                 self.G_SerialPort1OpenFlag = False
                 # gcmd.respond_info("Unable to connect to Phrozen devs")
                 # Vendor note (231207): 1-AMSfailed
                 # Vendor note (231207): 2-AMSttyfailed
-                self.G_PhrozenFluiddRespondInfo("+AMSERROR:1")
+                self.emit_protocol("+AMSERROR:1")
                 self.kaos_log("DEBUG", "AMS1 multi-material connectedfailed", "SERIAL")
                 # raise gcmd.error("AMS1 multi-material connectedfailed")
         except:
             self.kaos_log("DEBUG", "serial port 1 #1 time openfailed", "SERIAL")
-            # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:2")
+            # self.emit_protocol("+AMSCONNECT:2")
             # gcmd.respond_info("Unable open USB serial port, Please check USB port connect first")
             # Vendor note (231207): 1-AMSfailed
             # Vendor note (231207): 2-AMSttyfailed
-            self.G_PhrozenFluiddRespondInfo("+AMSERROR:2")
+            self.emit_protocol("+AMSERROR:2")
             self.kaos_log(
                 "DEBUG", "Unable to open tty1. Check the USB connection or try rebooting.", "SERIAL"
             )
@@ -12169,7 +12169,7 @@ class Commands(Base):
                 self.G_SerialPortIsOpenCount = self.G_SerialPortIsOpenCount + 1
 
                 # self.G_PhrozenFluiddRespondInfo("V-H%s-I%s-F%s" % (HW_VERSION,IMAGE_VERSION,FW_VERSION))
-                # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:0")
+                # self.emit_protocol("+AMSCONNECT:0")
 
             # Function name:
             # Input parameters:
@@ -12181,15 +12181,15 @@ class Commands(Base):
 
             else:
                 self.kaos_log("DEBUG", "serial port 2 #1 time openfailed", "SERIAL")
-                # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:1")
+                # self.emit_protocol("+AMSCONNECT:1")
                 self.G_SerialPort2OpenFlag = False
-                self.G_PhrozenFluiddRespondInfo("+AMSERROR:1")
+                self.emit_protocol("+AMSERROR:1")
                 self.kaos_log("DEBUG", "AMS2 multi-material connectedfailed", "SERIAL")
                 # raise gcmd.error("AMS2 multi-material connectedfailed")
         except:
             self.kaos_log("DEBUG", "serial port 2 #1 time openfailed", "SERIAL")
-            # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:2")
-            self.G_PhrozenFluiddRespondInfo("+AMSERROR:2")
+            # self.emit_protocol("+AMSCONNECT:2")
+            self.emit_protocol("+AMSERROR:2")
             self.kaos_log(
                 "DEBUG", "Unable to open tty2. Check the USB connection or try rebooting.", "SERIAL"
             )
@@ -12207,7 +12207,7 @@ class Commands(Base):
             self.G_PhrozenFluiddRespondInfo(
                 "V-H%s-I%s-F%s" % (HW_VERSION, IMAGE_VERSION, FW_VERSION)
             )
-            self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:0")
+            self.emit_protocol("+AMSCONNECT:0")
 
             if self.G_SerialPort1OpenFlag == True:
                 # Vendor note (240524): readAMS16HUB
@@ -12228,8 +12228,8 @@ class Commands(Base):
 
         # if0,successful
         else:
-            # self.G_PhrozenFluiddRespondInfo("+AMSCONNECT:2")
-            self.G_PhrozenFluiddRespondInfo("+AMSERROR:2")
+            # self.emit_protocol("+AMSCONNECT:2")
+            self.emit_protocol("+AMSERROR:2")
             self.kaos_log("DEBUG", "opentty port, please checkUSB port or try rebooting", "SERIAL")
 
             raise gcmd.error("has connectAMSAMS, connectAMSfailed")
@@ -12298,7 +12298,7 @@ class Commands(Base):
         self.kaos_log("DEBUG", "command: '%s'" % (gcmd.get_commandline(),), "SERIAL")
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+P11:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+P11:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
@@ -12399,7 +12399,7 @@ class Commands(Base):
             )
             # Lo_ChangeChannelIfSuccess = False
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             self.G_CutCheckTest = False
             return
 
@@ -12410,13 +12410,13 @@ class Commands(Base):
                 "SERIAL",
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             self.G_CutCheckTest = False
             return
 
         if "T" in params:
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P11 Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P11 Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
             self.G_ChangeChannelTimeoutOldGcmd = self.G_ChangeChannelTimeoutNewGcmd
             self.G_ChangeChannelTimeoutNewChan = int(params["T"])
@@ -12436,7 +12436,7 @@ class Commands(Base):
             # filament change
             self.Cmds_P1TnManualChangeChannel(int(params["T"]), gcmd)
             # for UIUX dynamic interface
-            # self.G_PhrozenFluiddRespondInfo("+P11 Tn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            # self.emit_protocol("+P11 Tn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             self.Cmds_MoveToCutFilaAction(gcmd)
 
@@ -12471,12 +12471,12 @@ class Commands(Base):
                 )
                 # Lo_ChangeChannelIfSuccess = False
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
                 self.G_CutCheckTest = False
                 return
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+P11:1,%d" % self.G_ChangeChannelTimeoutNewChan)
         self.G_CutCheckTest = False
 
     # P12 T?;loop
@@ -12506,7 +12506,7 @@ class Commands(Base):
         self.kaos_log("DEBUG", "command: '%s'" % (gcmd.get_commandline(),), "SERIAL")
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+P12:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+P12:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
@@ -12607,7 +12607,7 @@ class Commands(Base):
             )
             # Lo_ChangeChannelIfSuccess = False
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             self.G_CutCheckTest = False
             return
 
@@ -12618,13 +12618,13 @@ class Commands(Base):
                 "SERIAL",
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             self.G_CutCheckTest = False
             return
 
         if "T" in params:
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P12 Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P12 Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
             self.G_ChangeChannelTimeoutOldGcmd = self.G_ChangeChannelTimeoutNewGcmd
             self.G_ChangeChannelTimeoutNewChan = int(params["T"])
@@ -12644,7 +12644,7 @@ class Commands(Base):
             # filament change
             self.Cmds_P1TnManualChangeChannel(int(params["T"]), gcmd)
             # for UIUX dynamic interface
-            # self.G_PhrozenFluiddRespondInfo("+P12 Tn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            # self.emit_protocol("+P12 Tn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             self.Cmds_MoveToCutFilaAction(gcmd)
 
@@ -12679,12 +12679,12 @@ class Commands(Base):
                 )
                 # Lo_ChangeChannelIfSuccess = False
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
                 self.G_CutCheckTest = False
                 return
 
         # for UIUX dynamic interface
-        self.G_PhrozenFluiddRespondInfo("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+P12:1,%d" % self.G_ChangeChannelTimeoutNewChan)
         self.G_CutCheckTest = False
 
     #'P9 X195.940 Y242.500 W3.010 H41.450 D?'
@@ -12934,7 +12934,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 1
-                self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                self.emit_protocol("+T:0,1")
             elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                 self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                 self.Cmds_AMSSerial1Send("T2")
@@ -12943,7 +12943,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 2
-                self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                self.emit_protocol("+T:0,2")
             elif self.G_AMS1DeviceState["park_state"] & bitmask4 == 4:  # 0100
                 self.kaos_log("DEBUG", "serial port 1Sending command: T3", "SERIAL")
                 self.Cmds_AMSSerial1Send("T3")
@@ -12952,7 +12952,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 3
-                self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                self.emit_protocol("+T:0,3")
             elif self.G_AMS1DeviceState["park_state"] & bitmask8 == 8:  # 1000
                 self.kaos_log("DEBUG", "serial port 1Sending command: T4", "SERIAL")
                 self.Cmds_AMSSerial1Send("T4")
@@ -12961,7 +12961,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 4
-                self.G_PhrozenFluiddRespondInfo("+T:0,4")
+                self.emit_protocol("+T:0,4")
             else:
                 self.kaos_log("DEBUG", "no filament", "SERIAL")
         elif self.G_AMS1DeviceState["entry_state"] & bitmask1 == 1:  # 0001
@@ -12972,7 +12972,7 @@ class Commands(Base):
             else:
                 self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
             self.G_ChangeChannelTimeoutNewChan = 1
-            self.G_PhrozenFluiddRespondInfo("+T:0,1")
+            self.emit_protocol("+T:0,1")
         elif self.G_AMS1DeviceState["entry_state"] & bitmask2 == 2:  # 0010
             if self.G_AMS1DeviceState["park_state"] & bitmask1 == 1:  # 0001
                 self.kaos_log("DEBUG", "serial port 1Sending command: T1", "SERIAL")
@@ -12982,7 +12982,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 1
-                self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                self.emit_protocol("+T:0,1")
             elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                 self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                 self.Cmds_AMSSerial1Send("T2")
@@ -12991,7 +12991,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 2
-                self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                self.emit_protocol("+T:0,2")
             else:
                 self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                 self.Cmds_AMSSerial1Send("T2")
@@ -13000,7 +13000,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 2
-                self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                self.emit_protocol("+T:0,2")
         elif self.G_AMS1DeviceState["entry_state"] & bitmask4 == 4:  # 0100
             if self.G_AMS1DeviceState["park_state"] & bitmask1 == 1:  # 0001
                 self.kaos_log("DEBUG", "serial port 1Sending command: T1", "SERIAL")
@@ -13010,7 +13010,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 1
-                self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                self.emit_protocol("+T:0,1")
             elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                 self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                 self.Cmds_AMSSerial1Send("T2")
@@ -13019,7 +13019,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 2
-                self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                self.emit_protocol("+T:0,2")
             elif self.G_AMS1DeviceState["park_state"] & bitmask4 == 4:  # 0100
                 self.kaos_log("DEBUG", "serial port 1Sending command: T3", "SERIAL")
                 self.Cmds_AMSSerial1Send("T3")
@@ -13028,7 +13028,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 3
-                self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                self.emit_protocol("+T:0,3")
             else:
                 self.kaos_log("DEBUG", "serial port 1Sending command: T3", "SERIAL")
                 self.Cmds_AMSSerial1Send("T3")
@@ -13037,7 +13037,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 3
-                self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                self.emit_protocol("+T:0,3")
         elif self.G_AMS1DeviceState["entry_state"] & bitmask8 == 8:  # 1000
             if self.G_AMS1DeviceState["park_state"] & bitmask1 == 1:  # 0001
                 self.kaos_log("DEBUG", "serial port 1Sending command: T1", "SERIAL")
@@ -13047,7 +13047,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 1
-                self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                self.emit_protocol("+T:0,1")
             elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                 self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                 self.Cmds_AMSSerial1Send("T2")
@@ -13056,7 +13056,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 2
-                self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                self.emit_protocol("+T:0,2")
             # [Translated vendor note] #Vendor note (20231019): print, filament change1channeltoolheadfilament, filament
             # [Translated vendor note] #Vendor note (20231020): toolhead
             # #if self.G_ToolheadIfHaveFilaFlag:
@@ -13091,7 +13091,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 3
-                self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                self.emit_protocol("+T:0,3")
             elif self.G_AMS1DeviceState["park_state"] & bitmask8 == 8:  # 1000
                 self.kaos_log("DEBUG", "serial port 1Sending command: T4", "SERIAL")
                 self.Cmds_AMSSerial1Send("T4")
@@ -13100,7 +13100,7 @@ class Commands(Base):
                 else:
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 4
-                self.G_PhrozenFluiddRespondInfo("+T:0,4")
+                self.emit_protocol("+T:0,4")
             else:
                 self.kaos_log("DEBUG", "serial port 1Sending command: T4", "SERIAL")
                 self.Cmds_AMSSerial1Send("T4")
@@ -13110,7 +13110,7 @@ class Commands(Base):
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                 self.G_ChangeChannelTimeoutNewChan = 4
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+T:0,4")
+                self.emit_protocol("+T:0,4")
 
     # P8 execute Yes;"FA";
     def Cmds_CmdP8(self, gcmd):
@@ -13126,15 +13126,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         Lo_MCUSTM32Cmd = G_DictPhrozenCmdP8["mcu_cmd"][0]
 
@@ -13540,15 +13540,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
@@ -13737,338 +13737,338 @@ class Commands(Base):
         #         #     self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #         #     self.G_ChangeChannelTimeoutNewChan=1
         #         #     # Vendor note (240524): for UIUX dynamic interface
-        #         #     self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #         #     self.emit_protocol("+T:0,1")
         #         if self.G_AMS1DeviceState["entry_state"]==1:#0001
         #         #if self.G_AMS1DeviceState["park_state"]==1:#0001
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         #         elif self.G_AMS1DeviceState["entry_state"]==2:#0010
         #             if self.G_AMS1DeviceState["park_state"]==1:#0001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==2:#0010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             else:
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #         elif self.G_AMS1DeviceState["entry_state"]==3:#0011
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
         #             # Vendor note (240524): for UIUX dynamic interface
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         #         elif self.G_AMS1DeviceState["entry_state"]==4:#0100
         #             if self.G_AMS1DeviceState["park_state"]==1:#0001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==2:#0010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==3:#0011
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==4:#0100
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T3")
         #                 self.Cmds_AMSSerial1Send("T3")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=3
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,3")
+        #                 self.emit_protocol("+T:0,3")
         #             elif self.G_AMS1DeviceState["park_state"]==5:#0101
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==6:#0110
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==7:#0111
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             else:
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T3")
         #                 self.Cmds_AMSSerial1Send("T3")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=3
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,3")
+        #                 self.emit_protocol("+T:0,3")
         #         elif self.G_AMS1DeviceState["entry_state"]==5:#0101
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
         #             # Vendor note (240524): for UIUX dynamic interface
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         #         elif self.G_AMS1DeviceState["entry_state"]==6:#0110
         #             if self.G_AMS1DeviceState["park_state"]==1:#0001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==2:#0010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             else:
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
         #                 # Vendor note (240524): for UIUX dynamic interface
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #         elif self.G_AMS1DeviceState["entry_state"]==7:#0111
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
         #             # Vendor note (240524): for UIUX dynamic interface
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         #         elif self.G_AMS1DeviceState["entry_state"]==8:#1000
         #             if self.G_AMS1DeviceState["park_state"]==1:#0001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==2:#0010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==3:#0011
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==4:#0100
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T3")
         #                 self.Cmds_AMSSerial1Send("T3")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=3
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,3")
+        #                 self.emit_protocol("+T:0,3")
         #             elif self.G_AMS1DeviceState["park_state"]==5:#0101
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==6:#0110
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==7:#0111
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==8:#1000
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T4")
         #                 self.Cmds_AMSSerial1Send("T4")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=4
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,4")
+        #                 self.emit_protocol("+T:0,4")
         #             elif self.G_AMS1DeviceState["park_state"]==9:#1001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==10:#1010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==11:#1011
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==12:#1100
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T3")
         #                 self.Cmds_AMSSerial1Send("T3")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=3
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,3")
+        #                 self.emit_protocol("+T:0,3")
         #             elif self.G_AMS1DeviceState["park_state"]==13:#1101
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==14:#1110
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==15:#1111
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             else:
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T4")
         #                 self.Cmds_AMSSerial1Send("T4")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=4
         #                 # Vendor note (240524): for UIUX dynamic interface
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,4")
+        #                 self.emit_protocol("+T:0,4")
         #         elif self.G_AMS1DeviceState["entry_state"]==9:#1001
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
         #             # Vendor note (240524): for UIUX dynamic interface
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         #         elif self.G_AMS1DeviceState["entry_state"]==10:#1010
         #             if self.G_AMS1DeviceState["park_state"]==1:#0001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==2:#0010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             else:
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
         #                 # Vendor note (240524): for UIUX dynamic interface
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #         elif self.G_AMS1DeviceState["entry_state"]==11:#1011
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
         #             # Vendor note (240524): for UIUX dynamic interface
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         #         elif self.G_AMS1DeviceState["entry_state"]==12:#1100
         #             if self.G_AMS1DeviceState["park_state"]==1:#0001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==2:#0010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==3:#0011
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==4:#0100
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T3")
         #                 self.Cmds_AMSSerial1Send("T3")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=3
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,3")
+        #                 self.emit_protocol("+T:0,3")
         #             elif self.G_AMS1DeviceState["park_state"]==5:#0101
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==6:#0110
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             elif self.G_AMS1DeviceState["park_state"]==7:#0111
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             else:
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T3")
         #                 self.Cmds_AMSSerial1Send("T3")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=3
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,3")
+        #                 self.emit_protocol("+T:0,3")
         #         elif self.G_AMS1DeviceState["entry_state"]==13:#1101
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
         #             # Vendor note (240524): for UIUX dynamic interface
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         #         elif self.G_AMS1DeviceState["entry_state"]==14:#1110
         #             if self.G_AMS1DeviceState["park_state"]==1:#0001
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #                 self.Cmds_AMSSerial1Send("T1")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=1
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #                 self.emit_protocol("+T:0,1")
         #             elif self.G_AMS1DeviceState["park_state"]==2:#0010
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #             else:
         #                 self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T2")
         #                 self.Cmds_AMSSerial1Send("T2")
         #                 self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #                 self.G_ChangeChannelTimeoutNewChan=2
         #                 # Vendor note (240524): for UIUX dynamic interface
-        #                 self.G_PhrozenFluiddRespondInfo("+T:0,2")
+        #                 self.emit_protocol("+T:0,2")
         #         elif self.G_AMS1DeviceState["entry_state"]==15:#1111
         #             self.G_PhrozenFluiddRespondInfo("serial port 1Sending command: T1")
         #             self.Cmds_AMSSerial1Send("T1")
         #             self.G_ChangeChannelTimeoutOldChan=self.G_ChangeChannelTimeoutNewChan
         #             self.G_ChangeChannelTimeoutNewChan=1
         #             # Vendor note (240524): for UIUX dynamic interface
-        #             self.G_PhrozenFluiddRespondInfo("+T:0,1")
+        #             self.emit_protocol("+T:0,1")
         if self.G_AMSDevice1IfNormal == True:
             bitmask1 = 0b0001
             bitmask2 = 0b0010
@@ -14086,25 +14086,25 @@ class Commands(Base):
                         self.Cmds_AMSSerial1Send("T1")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 1
-                        self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                        self.emit_protocol("+T:0,1")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                         self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                         self.Cmds_AMSSerial1Send("T2")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 2
-                        self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                        self.emit_protocol("+T:0,2")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask4 == 4:  # 0100
                         self.kaos_log("DEBUG", "serial port 1Sending command: T3", "SERIAL")
                         self.Cmds_AMSSerial1Send("T3")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 3
-                        self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                        self.emit_protocol("+T:0,3")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask8 == 8:  # 1000
                         self.kaos_log("DEBUG", "serial port 1Sending command: T4", "SERIAL")
                         self.Cmds_AMSSerial1Send("T4")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 4
-                        self.G_PhrozenFluiddRespondInfo("+T:0,4")
+                        self.emit_protocol("+T:0,4")
                     else:
                         self.kaos_log("DEBUG", "no filament", "SERIAL")
                 elif self.G_AMS1DeviceState["entry_state"] & bitmask1 == 1:  # 0001
@@ -14112,83 +14112,83 @@ class Commands(Base):
                     self.Cmds_AMSSerial1Send("T1")
                     self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                     self.G_ChangeChannelTimeoutNewChan = 1
-                    self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                    self.emit_protocol("+T:0,1")
                 elif self.G_AMS1DeviceState["entry_state"] & bitmask2 == 2:  # 0010
                     if self.G_AMS1DeviceState["park_state"] & bitmask1 == 1:  # 0001
                         self.kaos_log("DEBUG", "serial port 1Sending command: T1", "SERIAL")
                         self.Cmds_AMSSerial1Send("T1")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 1
-                        self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                        self.emit_protocol("+T:0,1")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                         self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                         self.Cmds_AMSSerial1Send("T2")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 2
-                        self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                        self.emit_protocol("+T:0,2")
                     else:
                         self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                         self.Cmds_AMSSerial1Send("T2")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 2
-                        self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                        self.emit_protocol("+T:0,2")
                 elif self.G_AMS1DeviceState["entry_state"] & bitmask4 == 4:  # 0100
                     if self.G_AMS1DeviceState["park_state"] & bitmask1 == 1:  # 0001
                         self.kaos_log("DEBUG", "serial port 1Sending command: T1", "SERIAL")
                         self.Cmds_AMSSerial1Send("T1")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 1
-                        self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                        self.emit_protocol("+T:0,1")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                         self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                         self.Cmds_AMSSerial1Send("T2")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 2
-                        self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                        self.emit_protocol("+T:0,2")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask4 == 4:  # 0100
                         self.kaos_log("DEBUG", "serial port 1Sending command: T3", "SERIAL")
                         self.Cmds_AMSSerial1Send("T3")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 3
-                        self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                        self.emit_protocol("+T:0,3")
                     else:
                         self.kaos_log("DEBUG", "serial port 1Sending command: T3", "SERIAL")
                         self.Cmds_AMSSerial1Send("T3")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 3
-                        self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                        self.emit_protocol("+T:0,3")
                 elif self.G_AMS1DeviceState["entry_state"] & bitmask8 == 8:  # 1000
                     if self.G_AMS1DeviceState["park_state"] & bitmask1 == 1:  # 0001
                         self.kaos_log("DEBUG", "serial port 1Sending command: T1", "SERIAL")
                         self.Cmds_AMSSerial1Send("T1")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 1
-                        self.G_PhrozenFluiddRespondInfo("+T:0,1")
+                        self.emit_protocol("+T:0,1")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask2 == 2:  # 0010
                         self.kaos_log("DEBUG", "serial port 1Sending command: T2", "SERIAL")
                         self.Cmds_AMSSerial1Send("T2")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 2
-                        self.G_PhrozenFluiddRespondInfo("+T:0,2")
+                        self.emit_protocol("+T:0,2")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask4 == 4:  # 0100
                         self.kaos_log("DEBUG", "serial port 1Sending command: T3", "SERIAL")
                         self.Cmds_AMSSerial1Send("T3")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 3
-                        self.G_PhrozenFluiddRespondInfo("+T:0,3")
+                        self.emit_protocol("+T:0,3")
                     elif self.G_AMS1DeviceState["park_state"] & bitmask8 == 8:  # 1000
                         self.kaos_log("DEBUG", "serial port 1Sending command: T4", "SERIAL")
                         self.Cmds_AMSSerial1Send("T4")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 4
-                        self.G_PhrozenFluiddRespondInfo("+T:0,4")
+                        self.emit_protocol("+T:0,4")
                     else:
                         self.kaos_log("DEBUG", "serial port 1Sending command: T4", "SERIAL")
                         self.Cmds_AMSSerial1Send("T4")
                         self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
                         self.G_ChangeChannelTimeoutNewChan = 4
                         # for UIUX dynamic interface
-                        self.G_PhrozenFluiddRespondInfo("+T:0,4")
+                        self.emit_protocol("+T:0,4")
             else:
                 self.kaos_log("DEBUG", "#1 AMSno filament", "SERIAL")
 
@@ -14262,15 +14262,15 @@ class Commands(Base):
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # if not "A" in params:
         #     return
@@ -14320,7 +14320,7 @@ class Commands(Base):
                     "SERIAL",
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A1:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A1:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (231201): complete,if,,cannotneedfilament
 
                 if self.G_ToolheadIfHaveFilaFlag == True:
@@ -14407,7 +14407,7 @@ class Commands(Base):
                 # self.G_PhrozenGCode.run_script_from_command(command_string)
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A1:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A1:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 # time.sleep(0.5)
                 self.kaos_log("DEBUG", "when 0.5", "SERIAL")
@@ -14445,7 +14445,7 @@ class Commands(Base):
                     "SERIAL",
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A2:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A2:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (240319): before
                 # self.Cmds_MoveToCutFilaPrepare()
 
@@ -14498,7 +14498,7 @@ class Commands(Base):
                 # self.Cmds_CutFilaIfNormalCheck()
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A2:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A2:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 # time.sleep(0.5)
                 self.kaos_log("DEBUG", "when 0.5", "SERIAL")
@@ -14516,13 +14516,13 @@ class Commands(Base):
                     "DEBUG", "command='%s'; cut filament" % (gcmd.get_commandline(),), "SERIAL"
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A3:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A3:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (240319): before
                 # self.Cmds_MoveToCutFilaPrepare()
 
                 self.Cmds_MoveToCutFilaAbsolutePositionNotReset(gcmd)
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A3:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A3:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 # Vendor note (250104): P2A3flag
                 self.G_P2A3Flag = 1
@@ -14548,13 +14548,13 @@ class Commands(Base):
                     "SERIAL",
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A4:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A4:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (240319): before
                 # self.Cmds_MoveToCutFilaPrepare()
 
                 self.Cmds_MoveToCutFilaAbsolutePositionNotReset(gcmd)
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A4:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A4:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             # P2 A5 completefilamentfilament,cannot
             if action == 5:
@@ -14573,13 +14573,13 @@ class Commands(Base):
                     "SERIAL",
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A5:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A5:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (240319): before
                 # self.Cmds_MoveToCutFilaPrepare()
 
                 self.Cmds_MoveToCutFilaAbsolutePositionNotReset(gcmd)
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A5:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A5:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             # P2 A6
             if action == 6:
@@ -14597,7 +14597,7 @@ class Commands(Base):
                     "SERIAL",
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A6:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A6:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (231201): complete,if,,cannotneedfilament
 
                 if self.G_ToolheadIfHaveFilaFlag == True:
@@ -14667,7 +14667,7 @@ class Commands(Base):
                 # self.G_PhrozenGCode.run_script_from_command(command_string)
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A6:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A6:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 # time.sleep(0.5)
                 self.kaos_log("DEBUG", "when 0.5", "SERIAL")
@@ -14691,7 +14691,7 @@ class Commands(Base):
                 #     self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_CmdP2]standalone multi-material, logical P2A?")
                 #     return
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A7:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A7:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
                     self.kaos_log("DEBUG", "[(cmds.python)Cmds_CmdP2]P0 M0Unknown mode", "SERIAL")
@@ -14785,7 +14785,7 @@ class Commands(Base):
                     "SERIAL",
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A7:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A7:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # Vendor note (231201): complete,if,,cannotneedfilament
 
                 if self.G_ToolheadIfHaveFilaFlag == True:
@@ -14903,7 +14903,7 @@ class Commands(Base):
                 self.G_ProzenToolhead.dwell(0.5)
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P2A7:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P2A7:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 return
 
@@ -14973,7 +14973,7 @@ class Commands(Base):
                     "SERIAL",
                 )
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 if not int(params["I"]) in range(-1000, 1000):
                     raise gcmd.error(
                         "no parameter number command;cmd '%s', move extrude"
@@ -14992,7 +14992,7 @@ class Commands(Base):
                 self.Cmds_P1InExtrudeManualIn(int(params["I"]))
 
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P1In:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P1In:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # # Vendor note (240705): ifP114AMS,
@@ -15004,7 +15004,7 @@ class Commands(Base):
         #     if "I" in params:
         #         self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_CmdP1]AMS multi-material P114 not connected, extrude directly")
         #         # Vendor note (240524): for UIUX dynamic interface
-        #         self.G_PhrozenFluiddRespondInfo("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        #         self.emit_protocol("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
         #         if not int(params["I"]) in range(-1000, 1000):
         #             raise gcmd.error("no parameter number command;cmd '%s', move extrude" % (gcmd.get_commandline()))
         #         # command_string = """
@@ -15020,21 +15020,21 @@ class Commands(Base):
         #         self.Cmds_P1InExtrudeManualIn(int(params["I"]))
 
         #         # Vendor note (240524): for UIUX dynamic interface
-        #         self.G_PhrozenFluiddRespondInfo("+P1In:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+        #         self.emit_protocol("+P1In:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         #         return
 
         self.kaos_log("DEBUG", "Current mode", "SERIAL")
         if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-            self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+            self.emit_mode(0, "unkown")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-            self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+            self.emit_mode(1, "MC")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-            self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+            self.emit_mode(2, "MA")
         elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-            self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+            self.emit_mode(3, "RUNOUT")
         else:
-            self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+            self.emit_mode(-1, "error")
 
         # Vendor note (240529): phrozen
         self.G_PhrozenFluiddRespondInfo(
@@ -15047,7 +15047,7 @@ class Commands(Base):
         # self.G_ProzenToolhead.dwell(0.5)
 
         # Vendor note (240105): AT
-        self.G_PhrozenFluiddRespondInfo("+P1START:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_protocol("+P1START:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (20231019): iffilament detected on toolhead,filamentexit
         # if self.G_ToolheadIfHaveFilaFlag:
@@ -15133,7 +15133,7 @@ class Commands(Base):
 
             self.kaos_log("DEBUG", "command='%s';" % (gcmd.get_commandline(),), "SERIAL")
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1S:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1S:0,%d" % self.G_ChangeChannelTimeoutNewChan)
 
             if self.G_IfInFilaBlockFlag:
                 self.kaos_log(
@@ -15141,9 +15141,9 @@ class Commands(Base):
                     "feed, first move P1 E?from toolhead up filament tube get output and move prz_resumeresume",
                     "SERIAL",
                 )
-                self.G_PhrozenFluiddRespondInfo("+P1END:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_channel_op("P1END", 0, self.G_ChangeChannelTimeoutNewChan)
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P1S:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P1S:1,%d" % self.G_ChangeChannelTimeoutNewChan)
                 return
 
             if int(params["S"]) == 0:
@@ -15175,9 +15175,9 @@ class Commands(Base):
             # Vendor note (240528): detect
             # self.Cmds_CutFilaIfNormalCheck()
 
-            self.G_PhrozenFluiddRespondInfo("+P1END:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_channel_op("P1END", 0, self.G_ChangeChannelTimeoutNewChan)
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1S:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1S:1,%d" % self.G_ChangeChannelTimeoutNewChan)
             return
 
         # Vendor note (20231013): auto filament change
@@ -15249,7 +15249,7 @@ class Commands(Base):
             )
             self.kaos_log("DEBUG", "Automatic filament change", "SERIAL")
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Cn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Cn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["C"]) in range(1, AMS_MAX_CHANNEL + 1):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', that must is C?"
@@ -15344,7 +15344,7 @@ class Commands(Base):
                     self.Cmds_P1CnAutoChangeChannel(chan, gcmd)
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Cn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Cn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (20231013): filament change
         # P1 T[n] filament change
@@ -15369,7 +15369,7 @@ class Commands(Base):
             self.kaos_log("DEBUG", "command='%s'; move" % (gcmd.get_commandline(),), "SERIAL")
             self.kaos_log("DEBUG", "move", "SERIAL")
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["T"]) in range(1, AMS_MAX_CHANNEL + 1):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', that must is T?"
@@ -15393,9 +15393,9 @@ class Commands(Base):
                     "feed, first move P1 E?from toolhead up filament tube get output and move prz_resumeresume",
                     "SERIAL",
                 )
-                self.G_PhrozenFluiddRespondInfo("+P1END:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_channel_op("P1END", 0, self.G_ChangeChannelTimeoutNewChan)
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P1Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P1Tn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 return
 
             # Vendor note (231202): #self.Cmds_MoveToCutFilaAbsolutePositionNotReset(gcmd)
@@ -15477,7 +15477,7 @@ class Commands(Base):
             # [Translated vendor note] P2 A7 filamentfilament, pause, printAMSfilament
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Tn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Tn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # P1 B[n]
         if "B" in params:
@@ -15502,7 +15502,7 @@ class Commands(Base):
                 "DEBUG", "command='%s'; filament full output" % (gcmd.get_commandline(),), "SERIAL"
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Bn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Bn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["B"]) in range(1, AMS_MAX_CHANNEL + 1):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', that must is B?"
@@ -15579,9 +15579,9 @@ class Commands(Base):
                     "feed, first move P1 E?from toolhead up filament tube get output and move prz_resumeresume",
                     "SERIAL",
                 )
-                self.G_PhrozenFluiddRespondInfo("+P1END:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_channel_op("P1END", 0, self.G_ChangeChannelTimeoutNewChan)
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P1Bn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P1Bn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
                 return
 
@@ -15596,7 +15596,7 @@ class Commands(Base):
             # Vendor note (240115): 1
             time.sleep(1)
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Bn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Bn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # P1 D[n]
         if "D" in params:
@@ -15621,7 +15621,7 @@ class Commands(Base):
                 "DEBUG", "command='%s'; move to park position" % (gcmd.get_commandline(),), "SERIAL"
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Dn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Dn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["D"]) in range(1, AMS_MAX_CHANNEL + 1):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', that must is D?"
@@ -15695,9 +15695,9 @@ class Commands(Base):
                     "feed, first move P1 E?from toolhead up filament tube get output and move prz_resumeresume",
                     "SERIAL",
                 )
-                self.G_PhrozenFluiddRespondInfo("+P1END:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_channel_op("P1END", 0, self.G_ChangeChannelTimeoutNewChan)
                 # for UIUX dynamic interface
-                self.G_PhrozenFluiddRespondInfo("+P1Dn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+                self.emit_protocol("+P1Dn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
                 return
 
             self.G_ChangeChannelTimeoutOldChan = self.G_ChangeChannelTimeoutNewChan
@@ -15712,7 +15712,7 @@ class Commands(Base):
             time.sleep(1)
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Dn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Dn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (231202): ,
         # P1 E[n]
@@ -15731,7 +15731,7 @@ class Commands(Base):
                 "SERIAL",
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1En:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1En:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["E"]) in range(1, AMS_MAX_CHANNEL + 1):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', that must is E?"
@@ -15748,7 +15748,7 @@ class Commands(Base):
             self.Cmds_P1EnForceForward(int(params["E"]), gcmd)
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1En:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1En:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (240228): distance,needstm32distance
         # P1 G[n];n:1~32(device,1~4);distance Yes;====="G?";
@@ -15762,7 +15762,7 @@ class Commands(Base):
 
             self.kaos_log("DEBUG", "command='%s'AMSfirst" % (gcmd.get_commandline(),), "SERIAL")
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Gn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Gn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["G"]) in range(1, AMS_MAX_CHANNEL + 1):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', that must is G?"
@@ -15823,7 +15823,7 @@ class Commands(Base):
             self.Cmds_P1GnExtruderBack(int(params["G"]), gcmd)
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Gn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Gn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         if "H" in params:
             self.kaos_log("DEBUG", "P1 H?", "SERIAL")
@@ -15837,7 +15837,7 @@ class Commands(Base):
                 "DEBUG", "command='%s'special refill" % (gcmd.get_commandline(),), "SERIAL"
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Hn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Hn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["H"]) in range(1, AMS_MAX_CHANNEL + 1):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', that must is H?"
@@ -15847,7 +15847,7 @@ class Commands(Base):
             self.Cmds_P1HnSpecialInfila(int(params["H"]), gcmd)
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Hn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Hn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # =====P1 I[n];stm32need;====="I?";
         if "I" in params:
@@ -15864,7 +15864,7 @@ class Commands(Base):
                 "SERIAL",
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["I"]) in range(-1000, 1000):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', move extrude" % (gcmd.get_commandline())
@@ -15873,7 +15873,7 @@ class Commands(Base):
             self.Cmds_P1InExtruderBack(int(params["I"]), gcmd)
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1In:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1In:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # =====P1 J[n];;;
         if "J" in params:
@@ -15885,7 +15885,7 @@ class Commands(Base):
                 "SERIAL",
             )
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Jn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Jn:0,%d" % self.G_ChangeChannelTimeoutNewChan)
             if not int(params["J"]) in range(-1000, 1000):
                 raise gcmd.error(
                     "no parameter number command;cmd '%s', move extrude parameter number error"
@@ -15895,10 +15895,10 @@ class Commands(Base):
             self.Cmds_P1JnManualSpitFila(int(params["J"]), gcmd)
 
             # for UIUX dynamic interface
-            self.G_PhrozenFluiddRespondInfo("+P1Jn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
+            self.emit_protocol("+P1Jn:1,%d" % self.G_ChangeChannelTimeoutNewChan)
 
         # Vendor note (240105): completeAT
-        self.G_PhrozenFluiddRespondInfo("+P1END:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+        self.emit_channel_op("P1END", 0, self.G_ChangeChannelTimeoutNewChan)
 
     # P0 M1;(device) Yes;"MC";P0 M1;P28;P2 A1;
     # P0 M2;refill mode(device);"MA";P0 M2;P28;P8;
@@ -15967,15 +15967,15 @@ class Commands(Base):
 
             self.kaos_log("DEBUG", "Current mode", "SERIAL")
             if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                self.emit_mode(0, "unkown")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                self.emit_mode(1, "MC")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                self.emit_mode(2, "MA")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                self.emit_mode(3, "RUNOUT")
             else:
-                self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                self.emit_mode(-1, "error")
 
             # time.sleep(0.5)
             self.kaos_log("DEBUG", "when 1", "SERIAL")
@@ -16087,15 +16087,15 @@ class Commands(Base):
 
             self.kaos_log("DEBUG", "Current mode", "SERIAL")
             if self.G_AMSDeviceWorkMode == AMS_WORK_MODE_UNKNOW:
-                self.G_PhrozenFluiddRespondInfo("+Mode:0,unkown")
+                self.emit_mode(0, "unkown")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MC:
-                self.G_PhrozenFluiddRespondInfo("+Mode:1,MC")
+                self.emit_mode(1, "MC")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_MA:
-                self.G_PhrozenFluiddRespondInfo("+Mode:2,MA")
+                self.emit_mode(2, "MA")
             elif self.G_AMSDeviceWorkMode == AMS_WORK_MODE_FILA_RUNOUT:
-                self.G_PhrozenFluiddRespondInfo("+Mode:3,RUNOUT")
+                self.emit_mode(3, "RUNOUT")
             else:
-                self.G_PhrozenFluiddRespondInfo("+Mode:-1,error")
+                self.emit_mode(-1, "error")
 
             self.G_CancelFlag = False
             self.G_KlipperIfPaused = False
@@ -16219,7 +16219,7 @@ class Commands(Base):
                 # if "I" in params:
                 # [Translated vendor note] self.G_PhrozenFluiddRespondInfo("[(cmds.python)Cmds_CmdP1]AMSP114, ")
                 # [Translated vendor note] #Vendor note (240524): UIUX
-                # self.G_PhrozenFluiddRespondInfo("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
+                # self.emit_protocol("+P1In:0,%d" % self.G_ChangeChannelTimeoutNewChan)
                 # if not int(params["I"]) in range(-1000, 1000):
                 # [Translated vendor note] raise gcmd.error(";cmd '%s', " % (gcmd.get_commandline()))
                 # # command_string = """
@@ -16433,7 +16433,7 @@ class Commands(Base):
                         self.Cmds_PhrozenKlipperPauseM2M3NoneCmdToSTM32(None)
                         # Vendor note (240411): detect
                         self.G_P0M3Flag = True
-                        # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                        # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                         self.G_PhrozenFluiddRespondInfo(
                             "+PAUSE:b,%d,%d"
                             % (
@@ -16696,7 +16696,7 @@ class Commands(Base):
                                 # Vendor note (240411): detect
                                 self.G_P0M3Flag = True
 
-                                # self.G_PhrozenFluiddRespondInfo("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
+                                # self.emit_protocol("+PAUSE:b,%d" % self.G_ChangeChannelTimeoutNewChan)
                                 self.G_PhrozenFluiddRespondInfo(
                                     "+PAUSE:b,%d,%d"
                                     % (
