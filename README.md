@@ -37,6 +37,7 @@ KAOS is a modular Klipper add-on system for the Phrozen Arco.
 It provides:
 
 - disabling of /root/soft_shutdown.sh
+- removal of Phrozen phone-home system (frp-oms)
 - safer movement and homing behavior
 - centralized user configuration
 - split feature-based config files
@@ -52,6 +53,9 @@ KAOS is no longer a single-file add-on. The current architecture uses a top-leve
 
 ## Disable /root/soft_shutdown.sh
 /root/soft_shutdown.sh runs once every 0.1 seconds on the stock Arco searching for a button press of a button that does not exist. It consumes 10% of Arco CPU time and provides no functionality or value. It appears to be a remnant of a test. This update disables it, freeing up CPU cycles.
+
+## Disable Phrozen phone-home (frp-oms)
+The stock Arco firmware ships with an frp (Fast Reverse Proxy) client that tunnels SSH, MQTT, and Fluidd access back to a Phrozen-controlled server in China. This gives Phrozen remote access to your printer without your knowledge or consent. KAOS kills the running phone-home processes, removes the frp-oms binaries, disables the systemd service, and patches the startup scripts so it never runs again.
 
 ## Safety & movement protection
 - Trusted homing checks, tracking & false-homed-state protection
@@ -162,11 +166,9 @@ Python support files are installed here:
 /home/mks/klipper/klippy/extras/phrozen_dev/
 ├── dev.py
 ├── kaos_logging.py
-├── kaos_translations.py
-└── lang/
-    ├── kaos_translations_en.py
-    ├── kaos_translations_fr.py
-    └── kaos_translations_zh.py
+├── cmds.py
+├── base.py
+└── cwebsocketapis.py
 ```
 
 The main entry point from `printer.cfg` is:
@@ -241,6 +243,24 @@ Pre-built release zips are attached to each GitLab tag (see [Releases](https://g
 4. Plug into the printer and run the Phrozen update flow — the updater finds `phrozen_dev/phrozen_dev.zip` and unpacks it
 5. The printer reboots automatically after install. If it does not, full power-cycle it (a Klipper-only restart isn't enough; Python modules need a fresh load).
 
+### Dev Install (Network)
+
+For developers with SSH access, you can install the latest dev branch directly over the network without building a release or using USB:
+
+```sh
+wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/dev/kaos-filament-startup-guards/tools/dev_deploy.sh | sh
+```
+
+Options:
+- `--branch <name>` — install from a different branch (default: `dev/kaos-filament-startup-guards`)
+- `--download-only` — download and stage files without running the installer
+- `--whatif` — dry-run: show what would be installed without making changes
+
+Example with options:
+```sh
+wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/main/tools/dev_deploy.sh | sh -s -- --branch main --whatif
+```
+
 ---
 
 ## Releases
@@ -306,17 +326,14 @@ Confirm the kaos folder exists:
 ls -la /home/mks/printer_data/config/kaos/
 ```
 
-Confirm language files copied:
-
-```bash
-ls -la /home/mks/klipper/klippy/extras/phrozen_dev/lang/
-```
-
 Confirm Python support files copied:
 
 ```bash
 ls -la /home/mks/klipper/klippy/extras/phrozen_dev/kaos_logging.py
-ls -la /home/mks/klipper/klippy/extras/phrozen_dev/kaos_translations.py
+ls -la /home/mks/klipper/klippy/extras/phrozen_dev/dev.py
+ls -la /home/mks/klipper/klippy/extras/phrozen_dev/cmds.py
+ls -la /home/mks/klipper/klippy/extras/phrozen_dev/base.py
+ls -la /home/mks/klipper/klippy/extras/phrozen_dev/cwebsocketapis.py
 ```
 
 ---
@@ -378,17 +395,11 @@ RESPOND PREFIX="KAOS_LOG" MSG="..."
 
 ## Translation Support
 
-KAOS includes Python translation support using:
+KAOS no longer uses runtime translation tables for Python logs.
+Log filtering and HMI/protocol pass-through are handled directly by:
 
 ```text
-kaos_translations.py
-lang/
-```
-
-Language files live in:
-
-```text
-/home/mks/klipper/klippy/extras/phrozen_dev/lang/
+kaos_logging.py
 ```
 
 Missing translations should fall back safely rather than breaking printer behavior.
@@ -577,8 +588,10 @@ grep -R -n "^[[:space:]]*KAOS_LOG[[:space:]]" /home/mks/printer_data/config
 ### Check for KAOS startup messages
 
 ```bash
-grep -n "KAOS\|ADDON_LOG\|kaos_logging\|kaos_translations" /home/mks/printer_data/logs/klippy.log | tail -100
+grep -n "KAOS\|ADDON_LOG\|kaos_logging" /home/mks/printer_data/logs/klippy.log | tail -100
 ```
+
+Updated grep without legacy translation artifacts:
 
 ### Check for Klipper errors
 
@@ -592,10 +605,10 @@ grep -i -n "error\|failed\|traceback\|unknown command\|unable\|not found" /home/
 find /home/mks/printer_data/config/kaos -maxdepth 1 -type f -name "*.cfg" -ls
 ```
 
-### Check installed language files
+### Check installed Python support files
 
 ```bash
-find /home/mks/klipper/klippy/extras/phrozen_dev/lang -maxdepth 1 -type f -name "*.py" -ls
+find /home/mks/klipper/klippy/extras/phrozen_dev -maxdepth 1 -type f \( -name "dev.py" -o -name "kaos_logging.py" -o -name "cmds.py" -o -name "base.py" -o -name "cwebsocketapis.py" \) -ls
 ```
 
 ---
