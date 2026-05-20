@@ -43,7 +43,7 @@ KAOS_LOG_LEVEL_INFO = 2
 KAOS_LOG_LEVEL_DEBUG = 3
 
 # Visible marker so we can prove which file Klipper loaded.
-KAOS_LOGGING_VERSION = "KAOS-v0.95.1-2026-05-17-screen-hmi-bypass"
+KAOS_LOGGING_VERSION = "KAOS-v0.95-2026-05-04"
 
 KAOS_LEVEL_TAGS = ("[ERROR]", "[WARN]", "[INFO]", "[DEBUG]")
 
@@ -93,6 +93,8 @@ def install_kaos_logging(obj):
     obj.KAOS_LogCategoriesEnabled = True
     obj.KAOS_LogTimestampEnabled = False
     obj.KAOS_LogLanguage = "en"
+    obj.KAOS_LogFilteringEnabled = True
+    obj.KAOS_LogTranslationEnabled = True
 
     # Preserve original vendor responder exactly once.
     if not hasattr(obj, "KAOS_OriginalRespondInfo"):
@@ -108,7 +110,6 @@ def install_kaos_logging(obj):
     obj.kaos_is_protocol_message = _kaos_is_protocol_message.__get__(obj, obj.__class__)
     obj.kaos_is_ams_state_json = _kaos_is_ams_state_json.__get__(obj, obj.__class__)
     obj.kaos_is_functional_light_message = _kaos_is_functional_light_message.__get__(obj, obj.__class__)
-    obj.kaos_is_hmi_sensitive_message = _kaos_is_hmi_sensitive_message.__get__(obj, obj.__class__)
     obj.kaos_is_silenced_serial_noise = _kaos_is_silenced_serial_noise.__get__(obj, obj.__class__)
     obj.kaos_is_known_debug_noise = _kaos_is_known_debug_noise.__get__(obj, obj.__class__)
     obj.kaos_emit_protocol = _kaos_emit_protocol.__get__(obj, obj.__class__)
@@ -118,6 +119,8 @@ def install_kaos_logging(obj):
     obj.KAOS_SetLogFlags = _KAOS_SetLogFlags.__get__(obj, obj.__class__)
     obj.KAOS_LogStatus = _KAOS_LogStatus.__get__(obj, obj.__class__)
     obj.KAOS_SetLogLanguage = _KAOS_SetLogLanguage.__get__(obj, obj.__class__)
+    obj.KAOS_SetLogFiltering = _KAOS_SetLogFiltering.__get__(obj, obj.__class__)
+    obj.KAOS_SetLogTranslation = _KAOS_SetLogTranslation.__get__(obj, obj.__class__)
 
     # Replace vendor responder with KAOS wrapper.
     obj.G_PhrozenFluiddRespondInfo = obj.kaos_filtered_respond_info
@@ -142,14 +145,40 @@ def install_kaos_logging(obj):
             desc="Set KAOS message language (LANG=en/fr/zh)",
         )
         obj.G_PhrozenGCode.register_command(
-            "KAOS_LOG_STATUS",
-            obj.KAOS_LogStatus,
-            desc="Show KAOS logging version and current settings",
+            "KAOS_LOG_FILTERING",
+            obj.KAOS_SetLogFiltering,
+            desc="Enable/disable KAOS log filtering (ENABLE=0/1)",
         )
-    except Exception:
-        # Do not risk printer startup if command registration fails.
-        pass
+        obj.G_PhrozenGCode.register_command(
+            "KAOS_LOG_TRANSLATION",
+            obj.KAOS_SetLogTranslation,
+            desc="Enable/disable KAOS log translation (ENABLE=0/1)",
+        )
+        # NOTE: KAOS_LOG_STATUS is implemented as a Klipper macro in kaos_logging.cfg.
+        # Do not register it here. If this duplicate Python registration fails,
+        # it prevents KAOS_T and KAOS_PROMPT_* from being registered below.
+        # obj.G_PhrozenGCode.register_command(
+        #     "KAOS_LOG_STATUS",
+        #     obj.KAOS_LogStatus,
+        #     desc="Show KAOS logging version and current settings",
+        # )
 
+        # Register KAOS translated message / prompt commands if available.
+        # This keeps dev.py as a single KAOS bootstrap hook while allowing
+        # kaos_translations.py to own KAOS_T, KAOS_T_LOG, and KAOS_PROMPT_*.
+        try:
+            from .kaos_translations import install_kaos_t_command
+            install_kaos_t_command(obj)
+            obj.KAOS_OriginalRespondInfo("[WARN] [KAOS] KAOS_T and KAOS_PROMPT commands registered")
+        except Exception as exc:
+            # Keep startup safe, but make the failure visible for diagnosis.
+            obj.KAOS_OriginalRespondInfo("[ERROR] [KAOS] KAOS_T registration failed: %s" % exc)
+    except Exception as exc:
+        # Do not risk printer startup if command registration fails, but do not hide why.
+        try:
+            obj.KAOS_OriginalRespondInfo("[ERROR] [KAOS] KAOS command registration failed: %s" % exc)
+        except Exception:
+            pass
 
 
 def _kaos_strip_level_prefix(self, msg):
@@ -315,59 +344,6 @@ def _kaos_is_functional_light_message(self, msg):
     return False
 
 
-
-def _kaos_is_hmi_sensitive_message(self, msg):
-    """Detect vendor screen/HMI traffic that must pass through raw.
-
-    Screen-started prints appear to depend on some Phrozen responder strings
-    exactly as emitted. These strings look like debug chatter and may match the
-    known-debug filter, but re-rendering them as KAOS [DEBUG] lines can break
-    the touchscreen print-start handshake. Keep this narrow and pass them
-    through byte-for-byte via the original responder.
-    """
-    text = str(msg).strip()
-
-    hmi_sensitive_tokens = (
-        # Screen / vendor print-start command path
-        "Cmds_CmdP0",
-        "Cmds_CmdP2",
-        "Cmds_CmdP8",
-        "Cmds_CmdP28",
-        "Cmds_CmdP29",
-        "Cmds_CmdP30",
-        "Cmds_CmdP114",
-
-        # Screen-visible homing/start markers
-        "homing_override_start",
-        "homing_override_end",
-        "MAINTENANCE_ITEM_PARAM",
-
-        # Vendor external macro bridge
-        "外部宏命令-",
-        "开始调用外部宏命令-",
-        "结束调用外部宏命令",
-        "调用外部宏-",
-        "调用宏命令:",
-        "External macro command-",
-        "External macro command ",
-        "Starting external macro",
-        "Finished external macro",
-
-        # Common print / AMS mode state messages
-        "P0 M1",
-        "P0 M2",
-        "P0 M3",
-        "P28",
-        "P2 A1",
-        "P2 A2",
-        "多色模式",
-        "单色模式",
-        "续料",
-    )
-
-    return any(token in text for token in hmi_sensitive_tokens)
-
-
 def _kaos_is_silenced_serial_noise(self, msg):
     """Suppress known harmless missing-tty2 chatter.
 
@@ -508,14 +484,13 @@ def _kaos_filtered_respond_info(self, msg):
     try:
         raw_text = str(msg).strip()
 
-        # Raw functional protocol/status must bypass translation and logging.
-        if self.kaos_is_protocol_message(raw_text) or self.kaos_is_ams_state_json(raw_text):
-            self.kaos_emit_protocol(raw_text)
+        # True bypass mode: preserve vendor behavior with minimal KAOS overhead.
+        if not getattr(self, "KAOS_LogFilteringEnabled", True):
+            self.KAOS_OriginalRespondInfo(msg)
             return
 
-        # Screen/HMI print-start traffic looks like debug output but may be
-        # parsed by the touchscreen path. It must pass through raw.
-        if self.kaos_is_hmi_sensitive_message(raw_text):
+        # Raw functional protocol/status must bypass translation and logging.
+        if self.kaos_is_protocol_message(raw_text) or self.kaos_is_ams_state_json(raw_text):
             self.kaos_emit_protocol(raw_text)
             return
 
@@ -530,18 +505,17 @@ def _kaos_filtered_respond_info(self, msg):
             return
 
         # Translate human-facing vendor text before parsing [INFO]/[WARN]/etc.
-        translated_text = kaos_translate_message(raw_text, self.KAOS_LogLanguage)
+        # Translation can be disabled while keeping filtering active for
+        # performance testing and maximum vendor-message visibility.
+        if getattr(self, "KAOS_LogTranslationEnabled", True):
+            translated_text = kaos_translate_message(raw_text, self.KAOS_LogLanguage)
+        else:
+            translated_text = raw_text
         level, clean_text = self.kaos_strip_level_prefix(translated_text)
 
         # Functional protocol/status must still bypass logging if a translated
         # line or a manually tagged line wraps it as [INFO] +P114:2, etc.
         if self.kaos_is_protocol_message(clean_text) or self.kaos_is_ams_state_json(clean_text):
-            self.kaos_emit_protocol(clean_text)
-            return
-
-        # Screen/HMI-sensitive traffic may also appear after translation or
-        # level/category parsing. Still pass it through without KAOS re-rendering.
-        if self.kaos_is_hmi_sensitive_message(clean_text):
             self.kaos_emit_protocol(clean_text)
             return
 
@@ -596,12 +570,14 @@ def _KAOS_LogStatus(self, gcmd):
     self.KAOS_OriginalRespondInfo(
         self.kaos_render_log(
             "WARN",
-            "KAOS logging status version=%s level=%d categories=%d timestamp=%d language=%s" % (
+            "KAOS logging status version=%s level=%d categories=%d timestamp=%d language=%s filtering=%d translation=%d" % (
                 KAOS_LOGGING_VERSION,
                 self.KAOS_LogVerbosity,
                 1 if self.KAOS_LogCategoriesEnabled else 0,
                 1 if self.KAOS_LogTimestampEnabled else 0,
                 self.KAOS_LogLanguage,
+                1 if getattr(self, "KAOS_LogFilteringEnabled", True) else 0,
+                1 if getattr(self, "KAOS_LogTranslationEnabled", True) else 0,
             ),
             "KAOS",
         )
@@ -636,6 +612,30 @@ def _KAOS_SetLogLanguage(self, gcmd):
         )
     )
 
+
+
+def _KAOS_SetLogFiltering(self, gcmd):
+    enable = gcmd.get_int("ENABLE", 1 if getattr(self, "KAOS_LogFilteringEnabled", True) else 0)
+    self.KAOS_LogFilteringEnabled = bool(1 if enable else 0)
+    self.KAOS_OriginalRespondInfo(
+        self.kaos_render_log(
+            "WARN",
+            "KAOS log filtering set to %d" % (1 if self.KAOS_LogFilteringEnabled else 0),
+            "KAOS",
+        )
+    )
+
+
+def _KAOS_SetLogTranslation(self, gcmd):
+    enable = gcmd.get_int("ENABLE", 1 if getattr(self, "KAOS_LogTranslationEnabled", True) else 0)
+    self.KAOS_LogTranslationEnabled = bool(1 if enable else 0)
+    self.KAOS_OriginalRespondInfo(
+        self.kaos_render_log(
+            "WARN",
+            "KAOS log translation set to %d" % (1 if self.KAOS_LogTranslationEnabled else 0),
+            "KAOS",
+        )
+    )
 
 def _KAOS_SetLogFlags(self, gcmd):
     self.KAOS_LogCategoriesEnabled = bool(
