@@ -124,15 +124,15 @@ trap 'rm -rf "$STAGE_DIR"' EXIT
 # inside. No outer wrapper folder — the user puts this phrozen_dev/ folder
 # directly on a USB stick root and the printer runs the install from there.
 PHROZEN_DEV="$STAGE_DIR/phrozen_dev"
-mkdir -p "$PHROZEN_DEV/kaos" "$PHROZEN_DEV/lang"
+mkdir -p "$PHROZEN_DEV/kaos"
 
 echo ">> KAOS version:    $KAOS_VERSION"
 echo ">> Target firmware: $FW_VERSION"
 echo ">> Package:         $PACKAGE_NAME"
 
-# Python module + language files
-cp phrozen_dev/dev.py phrozen_dev/kaos_logging.py phrozen_dev/kaos_translations.py "$PHROZEN_DEV/"
-cp phrozen_dev/lang/*.py "$PHROZEN_DEV/lang/"
+# All top-level files from phrozen_dev/ → package root
+# serial-screen/ subdirectory is excluded (deployed separately by installer)
+find phrozen_dev -maxdepth 1 -type f ! -name '.DS_Store' -exec cp {} "$PHROZEN_DEV/" \;
 
 # Top-level klipper config files
 cp config/kaos.cfg config/printer.cfg config/printer_gcode_macro.cfg "$PHROZEN_DEV/"

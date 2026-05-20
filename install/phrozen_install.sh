@@ -1,9 +1,9 @@
 #!/bin/sh
 # KAOS_VERSION: v0.95
 
-# KAOS / Phrozen installer fallback for unknown model
+# KAOS / Phrozen Arco installer (universal — auto-detects board variant)
 # POSIX sh compatible.
-# Purpose: install KAOS Python files, language files, top-level cfg files,
+# Purpose: install KAOS Python files and top-level cfg files,
 # and split /config/kaos/*.cfg files with loud diagnostics and verification.
 
 set -u
@@ -14,6 +14,17 @@ INSTALL_LOG="$CONFIG_DIR/kaos_install.log"
 SAVE_CONFIG_TMP="/tmp/kaos_save_config_$$.log"
 SOFT_SHUTDOWN_LOG_TMP="/tmp/kaos_soft_shutdown_$$.log"
 timestamp=$(date +%Y%m%d_%H%M%S)
+
+# --- WhatIf mode -------------------------------------------------------------
+# When --whatif is passed, no files are modified. The script runs all validation
+# and reports what it WOULD do.
+
+WHATIF=false
+for _arg in "$@"; do
+    case "$_arg" in
+        --whatif) WHATIF=true ;;
+    esac
+done
 
 log() {
     echo "KAOS_INSTALL: $*"
@@ -37,18 +48,17 @@ backup_file() {
     fi
 }
 
-
 soft_log() {
     log "$*"
-    echo "$*" >> "$SOFT_SHUTDOWN_LOG_TMP" 2>/dev/null || true
+    echo "$*" >> "$SOFT_SHUTDOWN_LOG_TMP" 2> /dev/null || true
 }
 
-disable_soft_shutdown() {
-    soft_log "soft_shutdown_disable_begin"
+remove_soft_shutdown() {
+    soft_log "soft_shutdown_remove_begin"
     soft_log "soft_shutdown_target=/root/soft_shutdown.sh"
 
     # Stop any currently running soft shutdown script.
-    if pkill -f '/root/soft_shutdown.sh' 2>/dev/null; then
+    if pkill -f '/root/soft_shutdown.sh' 2> /dev/null; then
         soft_log "soft_shutdown_process_status=killed"
     else
         soft_log "soft_shutdown_process_status=not_running_or_not_found"
@@ -56,8 +66,8 @@ disable_soft_shutdown() {
 
     # Disable startup references from rc.local if present, but leave the line visible for recovery.
     if [ -f /etc/rc.local ]; then
-        if grep -q '/root/soft_shutdown.sh' /etc/rc.local 2>/dev/null; then
-            sed -i '\|/root/soft_shutdown.sh| { /^[[:space:]]*#/! s|^|# KAOS disabled: |; }' /etc/rc.local 2>/dev/null || true
+        if grep -q '/root/soft_shutdown.sh' /etc/rc.local 2> /dev/null; then
+            sed -i '\|/root/soft_shutdown.sh| { /^[[:space:]]*#/! s|^|# KAOS disabled: |; }' /etc/rc.local 2> /dev/null || true
             soft_log "soft_shutdown_rc_local_status=reference_commented"
         else
             soft_log "soft_shutdown_rc_local_status=no_reference"
@@ -68,14 +78,14 @@ disable_soft_shutdown() {
 
     # Disable and mask any systemd unit that directly references soft_shutdown.sh.
     soft_shutdown_systemd_units=0
-    if command -v systemctl >/dev/null 2>&1; then
-        grep -rl '/root/soft_shutdown.sh' /etc/systemd/system /lib/systemd/system 2>/dev/null | while IFS= read -r unitfile; do
+    if command -v systemctl > /dev/null 2>&1; then
+        grep -rl '/root/soft_shutdown.sh' /etc/systemd/system /lib/systemd/system 2> /dev/null | while IFS= read -r unitfile; do
             unit=$(basename "$unitfile")
             soft_shutdown_systemd_units=1
             soft_log "soft_shutdown_systemd_unit_found=$unit"
-            systemctl stop "$unit" 2>/dev/null || true
-            systemctl disable "$unit" 2>/dev/null || true
-            systemctl mask "$unit" 2>/dev/null || true
+            systemctl stop "$unit" 2> /dev/null || true
+            systemctl disable "$unit" 2> /dev/null || true
+            systemctl mask "$unit" 2> /dev/null || true
             soft_log "soft_shutdown_systemd_unit_status=$unit stopped_disabled_masked"
         done
         #systemctl daemon-reload 2>/dev/null || true
@@ -84,28 +94,200 @@ disable_soft_shutdown() {
         soft_log "soft_shutdown_systemd_status=systemctl_not_found"
     fi
 
-    # Leave the script in place for possible recovery, but remove execute permission.
+    # Remove the script entirely — the Arco has no physical power button; this
+    # busy-loop just wastes CPU polling a GPIO that will never fire.
     if [ -f /root/soft_shutdown.sh ]; then
-        if chmod a-x /root/soft_shutdown.sh 2>/dev/null; then
-            soft_log "soft_shutdown_script_status=present_execute_permission_removed"
-        else
-            soft_log "soft_shutdown_script_status=present_chmod_failed"
-        fi
+        rm -f /root/soft_shutdown.sh
+        soft_log "soft_shutdown_script_status=removed"
     else
         soft_log "soft_shutdown_script_status=not_present"
     fi
 
-    soft_log "soft_shutdown_disable_end"
+    # Clean up the serial-screen overlay copy if it exists.
+    if [ -f "$TARGET_DIR/serial-screen/soft_shutdown.sh" ]; then
+        rm -f "$TARGET_DIR/serial-screen/soft_shutdown.sh"
+        soft_log "soft_shutdown_serial_screen_status=removed"
+    fi
+
+    soft_log "soft_shutdown_remove_end"
+}
+
+PHONE_HOME_LOG_TMP="/tmp/kaos_phone_home_$$.log"
+
+ph_log() {
+    log "$*"
+    echo "$*" >> "$PHONE_HOME_LOG_TMP" 2> /dev/null || true
+}
+
+remove_phone_home() {
+    ph_log "phone_home_remove_begin"
+
+    # Kill running phone-home processes.
+    for proc in phrozen_slave_ota phrozen_master frpc frpc_script; do
+        if pkill -f "$proc" 2> /dev/null; then
+            ph_log "phone_home_process=$proc status=killed"
+        else
+            ph_log "phone_home_process=$proc status=not_running"
+        fi
+    done
+
+    # Disable frpc systemd service if present.
+    if command -v systemctl > /dev/null 2>&1; then
+        for unit in frpc.service; do
+            if systemctl list-unit-files "$unit" > /dev/null 2>&1; then
+                systemctl stop "$unit" 2> /dev/null || true
+                systemctl disable "$unit" 2> /dev/null || true
+                systemctl mask "$unit" 2> /dev/null || true
+                ph_log "phone_home_systemd_unit=$unit status=stopped_disabled_masked"
+            else
+                ph_log "phone_home_systemd_unit=$unit status=not_found"
+            fi
+        done
+    fi
+
+    # Remove the frp-oms directory (contains all phone-home binaries and configs).
+    if [ -d "$TARGET_DIR/frp-oms" ]; then
+        rm -rf "$TARGET_DIR/frp-oms"
+        if [ ! -d "$TARGET_DIR/frp-oms" ]; then
+            ph_log "phone_home_frp_oms_dir=removed"
+        else
+            ph_log "phone_home_frp_oms_dir=removal_failed"
+        fi
+    else
+        ph_log "phone_home_frp_oms_dir=not_present"
+    fi
+
+    # Also remove from /etc/frp if installed there.
+    if [ -d /etc/frp ]; then
+        rm -rf /etc/frp
+        ph_log "phone_home_etc_frp=removed"
+    fi
+
+    # Remove system-level frpc binary (referenced by frpc.service systemd unit).
+    if [ -f /usr/bin/frpc ]; then
+        rm -f /usr/bin/frpc
+        ph_log "phone_home_usr_bin_frpc=removed"
+    fi
+
+    # Remove UDS socket left by phrozen_master.
+    rm -f /tmp/UNIX.domain 2> /dev/null || true
+
+    # Remove any crontab entries referencing phone-home binaries.
+    if command -v crontab > /dev/null 2>&1; then
+        if crontab -l 2> /dev/null | grep -qE 'frpc|phrozen_master|phrozen_slave_ota'; then
+            crontab -l 2> /dev/null | grep -vE 'frpc|phrozen_master|phrozen_slave_ota' | crontab - 2> /dev/null || true
+            ph_log "phone_home_crontab=cleaned"
+        fi
+    fi
+
+    # Comment out phone-home lines in start.sh.
+    START_SH="$TARGET_DIR/start.sh"
+    if [ -f "$START_SH" ]; then
+        if grep -q 'phrozen_slave_ota' "$START_SH" 2> /dev/null; then
+            sed -i '/phrozen_slave_ota/{ /^[[:space:]]*#/! s/^/# KAOS disabled: / }' "$START_SH" 2> /dev/null || true
+            sed -i '/killall phrozen_slave_ota/{ /^[[:space:]]*#/! s/^/# KAOS disabled: / }' "$START_SH" 2> /dev/null || true
+            ph_log "phone_home_start_sh=patched"
+        else
+            ph_log "phone_home_start_sh=already_clean"
+        fi
+    else
+        ph_log "phone_home_start_sh=not_present"
+    fi
+
+    # Comment out phone-home lines in KlipperScreen-start.sh.
+    KS_START="/home/mks/KlipperScreen/scripts/KlipperScreen-start.sh"
+    if [ -f "$KS_START" ]; then
+        patched=false
+        for pattern in phrozen_slave_ota phrozen_master frpc_script; do
+            if grep -q "$pattern" "$KS_START" 2> /dev/null; then
+                sed -i "/$pattern/{ /^[[:space:]]*#/! s/^/# KAOS disabled: / }" "$KS_START" 2> /dev/null || true
+                patched=true
+            fi
+        done
+        if $patched; then
+            ph_log "phone_home_klipperscreen_start=patched"
+        else
+            ph_log "phone_home_klipperscreen_start=already_clean"
+        fi
+    else
+        ph_log "phone_home_klipperscreen_start=not_present"
+    fi
+
+    ph_log "phone_home_remove_end"
+}
+
+# --- Remove PhrozenGo (TUTK cloud relay for Phrozen mobile app) ---------------
+# PhrozenGo is a Go binary (phrozen-go-release) extracted from PhrozenGo.tar
+# that acts as a TUTK IoT cloud relay enabling remote control via Phrozen's
+# mobile app. It runs as a persistent daemon via PhrozenGoStart.sh.
+# Removal: kills the process, removes the tarball, the extracted directory,
+# and the PhrozenGoStart.sh launcher scripts.
+
+remove_phrozen_go() {
+    ph_log "phrozen_go_remove_begin"
+
+    # Kill running PhrozenGo process.
+    if pkill -f "phrozen-go-release" 2> /dev/null; then
+        ph_log "phrozen_go_process=killed"
+    else
+        ph_log "phrozen_go_process=not_running"
+    fi
+
+    # Kill the PhrozenGoStart.sh wrapper if running.
+    if pkill -f "PhrozenGoStart.sh" 2> /dev/null; then
+        ph_log "phrozen_go_start_wrapper=killed"
+    else
+        ph_log "phrozen_go_start_wrapper=not_running"
+    fi
+
+    # Remove the PhrozenGo.tar tarball from phrozen_dev.
+    if [ -f "$TARGET_DIR/PhrozenGo.tar" ]; then
+        rm -f "$TARGET_DIR/PhrozenGo.tar"
+        ph_log "phrozen_go_tarball=removed"
+    else
+        ph_log "phrozen_go_tarball=not_present"
+    fi
+
+    # Remove the extracted PhrozenGo directory.
+    if [ -d "/home/mks/PhrozenGo" ]; then
+        rm -rf "/home/mks/PhrozenGo"
+        ph_log "phrozen_go_directory=removed"
+    else
+        ph_log "phrozen_go_directory=not_present"
+    fi
+
+    # Remove PhrozenGoStart.sh — TUTK cloud relay is permanently disabled.
+    PHROZEN_GO_START="$TARGET_DIR/PhrozenGoStart.sh"
+    if [ -f "$PHROZEN_GO_START" ]; then
+        rm -f "$PHROZEN_GO_START"
+        ph_log "phrozen_go_start_script=removed"
+    else
+        ph_log "phrozen_go_start_script=not_present"
+    fi
+
+    # Also remove serial-screen copy.
+    PHROZEN_GO_START_SS="$TARGET_DIR/serial-screen/PhrozenGoStart.sh"
+    if [ -f "$PHROZEN_GO_START_SS" ]; then
+        rm -f "$PHROZEN_GO_START_SS"
+        ph_log "phrozen_go_start_script_serial_screen=removed"
+    else
+        ph_log "phrozen_go_start_script_serial_screen=not_present"
+    fi
+
+    ph_log "phrozen_go_remove_end"
 }
 
 # Use the directory containing this installer as the source package directory.
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" 2>/dev/null && pwd)
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" 2> /dev/null && pwd)
 SOURCE_DIR="$SCRIPT_DIR"
 
 [ -f "$SOURCE_DIR/dev.py" ] || fail "Could not find source package directory containing dev.py: $SOURCE_DIR"
 
 log "script started"
-log "running as user: $(whoami 2>/dev/null || echo unknown)"
+if $WHATIF; then
+    log "*** --whatif mode: validation only, no files will be modified ***"
+fi
+log "running as user: $(whoami 2> /dev/null || echo unknown)"
 log "SOURCE_DIR=$SOURCE_DIR"
 log "TARGET_DIR=$TARGET_DIR"
 log "CONFIG_DIR=$CONFIG_DIR"
@@ -113,8 +295,10 @@ log "CONFIG_DIR=$CONFIG_DIR"
 # Validate source package before changing live files.
 [ -f "$SOURCE_DIR/dev.py" ] || fail "Missing source file: $SOURCE_DIR/dev.py"
 [ -f "$SOURCE_DIR/kaos_logging.py" ] || fail "Missing source file: $SOURCE_DIR/kaos_logging.py"
-[ -f "$SOURCE_DIR/kaos_translations.py" ] || fail "Missing source file: $SOURCE_DIR/kaos_translations.py"
-[ -d "$SOURCE_DIR/lang" ] || fail "Missing source directory: $SOURCE_DIR/lang"
+[ -f "$SOURCE_DIR/cmds.py" ] || fail "Missing source file: $SOURCE_DIR/cmds.py"
+[ -f "$SOURCE_DIR/base.py" ] || fail "Missing source file: $SOURCE_DIR/base.py"
+[ -f "$SOURCE_DIR/cwebsocketapis.py" ] || fail "Missing source file: $SOURCE_DIR/cwebsocketapis.py"
+[ -f "$SOURCE_DIR/KlipperScreen-start.sh" ] || fail "Missing source file: $SOURCE_DIR/KlipperScreen-start.sh"
 [ -f "$SOURCE_DIR/kaos.cfg" ] || fail "Missing source file: $SOURCE_DIR/kaos.cfg"
 [ -d "$SOURCE_DIR/kaos" ] || fail "Missing source directory: $SOURCE_DIR/kaos"
 [ -f "$SOURCE_DIR/printer.cfg" ] || fail "Missing source file: $SOURCE_DIR/printer.cfg"
@@ -123,30 +307,32 @@ log "CONFIG_DIR=$CONFIG_DIR"
 # Make wildcard failures explicit. Without this, cp may fail later with less useful context.
 set -- "$SOURCE_DIR"/kaos/*.cfg
 [ -f "$1" ] || fail "No .cfg files found in source directory: $SOURCE_DIR/kaos"
-set -- "$SOURCE_DIR"/lang/*.py
-[ -f "$1" ] || fail "No .py files found in source directory: $SOURCE_DIR/lang"
 
 # Validate destination paths and permissions before copying.
 [ -d "$TARGET_DIR" ] || fail "Target directory does not exist: $TARGET_DIR"
 [ -d "$CONFIG_DIR" ] || fail "Config directory does not exist: $CONFIG_DIR"
 
 log "checking write access to $TARGET_DIR"
-touch "$TARGET_DIR/.kaos_write_test" || fail "Cannot write to target directory: $TARGET_DIR"
-rm -f "$TARGET_DIR/.kaos_write_test" || fail "Cannot remove write-test file from: $TARGET_DIR"
+if ! $WHATIF; then
+    touch "$TARGET_DIR/.kaos_write_test" || fail "Cannot write to target directory: $TARGET_DIR"
+    rm -f "$TARGET_DIR/.kaos_write_test" || fail "Cannot remove write-test file from: $TARGET_DIR"
+fi
 
 log "checking write/create access to $CONFIG_DIR"
-touch "$CONFIG_DIR/.kaos_write_test" || fail "Cannot write to config directory: $CONFIG_DIR"
-rm -f "$CONFIG_DIR/.kaos_write_test" || fail "Cannot remove write-test file from: $CONFIG_DIR"
-mkdir -p "$CONFIG_DIR/.kaos_mkdir_test" || fail "Cannot create directories in config directory: $CONFIG_DIR"
-rmdir "$CONFIG_DIR/.kaos_mkdir_test" || fail "Cannot remove mkdir-test directory from: $CONFIG_DIR"
+if ! $WHATIF; then
+    touch "$CONFIG_DIR/.kaos_write_test" || fail "Cannot write to config directory: $CONFIG_DIR"
+    rm -f "$CONFIG_DIR/.kaos_write_test" || fail "Cannot remove write-test file from: $CONFIG_DIR"
+    mkdir -p "$CONFIG_DIR/.kaos_mkdir_test" || fail "Cannot create directories in config directory: $CONFIG_DIR"
+    rmdir "$CONFIG_DIR/.kaos_mkdir_test" || fail "Cannot remove mkdir-test directory from: $CONFIG_DIR"
+fi
 
 # Install log so we can prove this script actually ran and preserve live values before replacement.
 existing_fila_cut_x_pos="NOT_FOUND"
 rm -f "$SAVE_CONFIG_TMP"
 if [ -f "$CONFIG_DIR/printer.cfg" ]; then
     # Use the same grep pattern proven over SSH, then strip the key/comments/whitespace.
-    existing_fila_cut_x_pos=$(grep -m 1 -E '^[[:space:]]*fila_cut_x_pos[[:space:]]*:' "$CONFIG_DIR/printer.cfg" \
-        | sed -E 's/^[[:space:]]*fila_cut_x_pos[[:space:]]*:[[:space:]]*//; s/[[:space:]]*[#;].*$//; s/^[[:space:]]+//; s/[[:space:]]+$//')
+    existing_fila_cut_x_pos=$(grep -m 1 -E '^[[:space:]]*fila_cut_x_pos[[:space:]]*:' "$CONFIG_DIR/printer.cfg" |
+        sed -E 's/^[[:space:]]*fila_cut_x_pos[[:space:]]*:[[:space:]]*//; s/[[:space:]]*[#;].*$//; s/^[[:space:]]+//; s/[[:space:]]+$//')
     [ -n "$existing_fila_cut_x_pos" ] || existing_fila_cut_x_pos="NOT_FOUND"
 
     # Preserve the existing Klipper SAVE_CONFIG block before printer.cfg is replaced.
@@ -155,6 +341,81 @@ if [ -f "$CONFIG_DIR/printer.cfg" ]; then
         /^#\*#.*SAVE_CONFIG/ { found=1; print }
     ' "$CONFIG_DIR/printer.cfg" > "$SAVE_CONFIG_TMP"
 fi
+
+# --- WhatIf summary and early exit -------------------------------------------
+if $WHATIF; then
+    log ""
+    log "============================================================"
+    log "  --whatif: showing what WOULD happen (no changes made)"
+    log "============================================================"
+    log ""
+    log "Python files to install -> $TARGET_DIR:"
+    for f in dev.py kaos_logging.py cmds.py base.py cwebsocketapis.py; do
+        if [ -f "$SOURCE_DIR/$f" ]; then
+            log "  [COPY] $SOURCE_DIR/$f -> $TARGET_DIR/$f"
+        fi
+    done
+    log ""
+    log "Legacy files to remove:"
+    log "  [REMOVE] $TARGET_DIR/kaos_translations.py (if exists)"
+    log "  [REMOVE] $TARGET_DIR/lang/ (if exists)"
+    log ""
+    log "Config files to install -> $CONFIG_DIR:"
+    log "  [COPY] $SOURCE_DIR/kaos.cfg -> $CONFIG_DIR/kaos.cfg"
+    log "  [COPY] $SOURCE_DIR/printer.cfg -> $CONFIG_DIR/printer.cfg"
+    log "  [COPY] $SOURCE_DIR/printer_gcode_macro.cfg -> $CONFIG_DIR/printer_gcode_macro.cfg"
+    log ""
+    log "Split KAOS configs to install -> $CONFIG_DIR/kaos/:"
+    for f in "$SOURCE_DIR"/kaos/*.cfg; do
+        log "  [COPY] $f -> $CONFIG_DIR/kaos/$(basename "$f")"
+    done
+    log ""
+    log "Preservation:"
+    if [ "$existing_fila_cut_x_pos" != "NOT_FOUND" ]; then
+        log "  [PRESERVE] fila_cut_x_pos=$existing_fila_cut_x_pos"
+    else
+        log "  [SKIP] fila_cut_x_pos not found in live printer.cfg"
+    fi
+    if [ -s "$SAVE_CONFIG_TMP" ]; then
+        log "  [PRESERVE] SAVE_CONFIG block ($(wc -l < "$SAVE_CONFIG_TMP") lines)"
+    else
+        log "  [SKIP] No SAVE_CONFIG block in live printer.cfg"
+    fi
+    log ""
+    log "Legacy files to remove:"
+    log "  [REMOVE] $TARGET_DIR/kaos_translations.py (if exists)"
+    log "  [REMOVE] $TARGET_DIR/lang/ (if exists)"
+    log "  [REMOVE] $SOURCE_DIR/phrozen_install-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh (if exists)"
+    log "  [REMOVE] $SOURCE_DIR/phrozen_install-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh (if exists)"
+    log "  [REMOVE] $TARGET_DIR/phrozen_install-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh (if exists)"
+    log "  [REMOVE] $TARGET_DIR/phrozen_install-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh (if exists)"
+    log "  [REMOVE] $TARGET_DIR/start-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh (if exists)"
+    log "  [REMOVE] $TARGET_DIR/start-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh (if exists)"
+    log "  [REMOVE] $TARGET_DIR/KlipperScreen-start-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh (if exists)"
+    log "  [REMOVE] $TARGET_DIR/KlipperScreen-start-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh (if exists)"
+    log ""
+    log "Pre-install:"
+    log "  [BACKUP] $CONFIG_DIR/printer.cfg -> $CONFIG_DIR/printer.cfg.$timestamp.bak"
+    log ""
+    log "Post-install:"
+    log "  [CHMOD] Set 644 on all installed files, 755 on $CONFIG_DIR/kaos/"
+    log "  [REMOVE] soft_shutdown.sh"
+    log "  [REMOVE] Phrozen phone-home (frp-oms):"
+    log "    - Kill: phrozen_slave_ota, phrozen_master, frpc, frpc_script"
+    log "    - Mask: frpc.service (systemd)"
+    log "    - Remove: $TARGET_DIR/frp-oms/ (all phone-home binaries)"
+    log "    - Remove: /etc/frp/ (if exists)"
+    log "    - Patch: $TARGET_DIR/start.sh (comment out phone-home lines)"
+    log "    - Patch: /home/mks/KlipperScreen/scripts/KlipperScreen-start.sh"
+    log "  [REBOOT] System reboot"
+    log ""
+    log "============================================================"
+    log "  --whatif complete. No files were modified."
+    log "============================================================"
+    rm -f "$SAVE_CONFIG_TMP"
+    exit 0
+fi
+# --- End WhatIf --------------------------------------------------------------
 
 {
     echo "KAOS install started at $(date)"
@@ -170,12 +431,64 @@ backup_file "$CONFIG_DIR/printer.cfg"
 log "copying Python files"
 cp -f "$SOURCE_DIR/dev.py" "$TARGET_DIR/dev.py" || fail "Failed to copy dev.py"
 cp -f "$SOURCE_DIR/kaos_logging.py" "$TARGET_DIR/kaos_logging.py" || fail "Failed to copy kaos_logging.py"
-cp -f "$SOURCE_DIR/kaos_translations.py" "$TARGET_DIR/kaos_translations.py" || fail "Failed to copy kaos_translations.py"
+cp -f "$SOURCE_DIR/cmds.py" "$TARGET_DIR/cmds.py" || fail "Failed to copy cmds.py"
+cp -f "$SOURCE_DIR/base.py" "$TARGET_DIR/base.py" || fail "Failed to copy base.py"
+cp -f "$SOURCE_DIR/cwebsocketapis.py" "$TARGET_DIR/cwebsocketapis.py" || fail "Failed to copy cwebsocketapis.py"
 
-# Copy language files.
-log "creating/copying language directory"
-mkdir -p "$TARGET_DIR/lang" || fail "Failed to create $TARGET_DIR/lang"
-cp -a "$SOURCE_DIR/lang/." "$TARGET_DIR/lang/" || fail "Failed to copy language files"
+# Deploy KAOS-patched KlipperScreen-start.sh (phone-home removed, English comments).
+log "copying KlipperScreen-start.sh"
+cp -f "$SOURCE_DIR/KlipperScreen-start.sh" "$TARGET_DIR/KlipperScreen-start.sh" || fail "Failed to copy KlipperScreen-start.sh"
+chmod 755 "$TARGET_DIR/KlipperScreen-start.sh"
+
+# Remove legacy translation artifacts from previous installs.
+rm -f "$TARGET_DIR/kaos_translations.py"
+rm -rf "$TARGET_DIR/lang"
+
+# Remove legacy translation artifacts from previous installs.
+rm -f "$TARGET_DIR/kaos_translations.py"
+rm -rf "$TARGET_DIR/lang"
+
+# Remove deprecated board-specific scripts left by previous installs.
+# These are dead files on production MKS boards — nothing calls them.
+log "cleaning up deprecated board-specific scripts"
+for old_script in \
+    "$SOURCE_DIR/phrozen_install-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh" \
+    "$SOURCE_DIR/phrozen_install-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh" \
+    "$TARGET_DIR/phrozen_install-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh" \
+    "$TARGET_DIR/phrozen_install-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh" \
+    "$TARGET_DIR/start-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh" \
+    "$TARGET_DIR/start-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh" \
+    "$TARGET_DIR/KlipperScreen-start-ARCO300-MKS-RK3328-STM32F407VET6-I16.sh" \
+    "$TARGET_DIR/KlipperScreen-start-ARCO300-phrozen-RK3308-STM32F407VET6-I31.sh"; do
+    if [ -f "$old_script" ]; then
+        rm -f "$old_script" && log "  removed: $old_script" || log "  WARNING: failed to remove $old_script"
+    fi
+done
+
+# Update klipperscreen.service to reference the generic KlipperScreen-start.sh.
+KS_SERVICE_SRC="$SOURCE_DIR/serial-screen/klipperscreen.service"
+KS_SERVICE_DST="/etc/systemd/system/klipperscreen.service"
+if [ -f "$KS_SERVICE_SRC" ]; then
+    if [ -f "$KS_SERVICE_DST" ]; then
+        if grep -q 'KlipperScreen-start-ARCO300' "$KS_SERVICE_DST" 2> /dev/null; then
+            cp -f "$KS_SERVICE_SRC" "$KS_SERVICE_DST" || log "WARNING: failed to update klipperscreen.service"
+            systemctl daemon-reload 2> /dev/null || true
+            log "klipperscreen.service updated to use KlipperScreen-start.sh"
+        else
+            log "klipperscreen.service already points to generic start script"
+        fi
+    else
+        log "klipperscreen.service not found at $KS_SERVICE_DST — skipping"
+    fi
+else
+    log "WARNING: klipperscreen.service source not found: $KS_SERVICE_SRC"
+fi
+
+# Remove stale serial-screen/printer.cfg — hardware config is managed via config/printer.cfg.
+if [ -f "$TARGET_DIR/serial-screen/printer.cfg" ]; then
+    rm -f "$TARGET_DIR/serial-screen/printer.cfg"
+    log "removed stale serial-screen/printer.cfg"
+fi
 
 # Copy KAOS split cfg files BEFORE printer.cfg.
 # This prevents printer.cfg from being installed while its [include kaos/*.cfg] target is missing.
@@ -201,8 +514,8 @@ save_config_update_status="skipped_NOT_FOUND"
 if [ "$existing_fila_cut_x_pos" != "NOT_FOUND" ]; then
     if grep -qE '^[[:space:]]*fila_cut_x_pos[[:space:]]*:' "$CONFIG_DIR/printer.cfg"; then
         PRINTER_CFG_TMP="/tmp/kaos_printer_cfg_$$.tmp"
-        sed -E "s|^[[:space:]]*fila_cut_x_pos[[:space:]]*:.*|fila_cut_x_pos: $existing_fila_cut_x_pos|"             "$CONFIG_DIR/printer.cfg" > "$PRINTER_CFG_TMP"             || fail "Failed to prepare preserved fila_cut_x_pos update"
-        mv -f "$PRINTER_CFG_TMP" "$CONFIG_DIR/printer.cfg"             || fail "Failed to apply preserved fila_cut_x_pos to printer.cfg"
+        sed -E "s|^[[:space:]]*fila_cut_x_pos[[:space:]]*:.*|fila_cut_x_pos: $existing_fila_cut_x_pos|" "$CONFIG_DIR/printer.cfg" > "$PRINTER_CFG_TMP" || fail "Failed to prepare preserved fila_cut_x_pos update"
+        mv -f "$PRINTER_CFG_TMP" "$CONFIG_DIR/printer.cfg" || fail "Failed to apply preserved fila_cut_x_pos to printer.cfg"
 
         if grep -qE "^[[:space:]]*fila_cut_x_pos[[:space:]]*:[[:space:]]*$existing_fila_cut_x_pos([[:space:]]*([#;].*)?)?$" "$CONFIG_DIR/printer.cfg"; then
             fila_cut_x_pos_update_status="updated"
@@ -235,14 +548,13 @@ if [ -s "$SAVE_CONFIG_TMP" ]; then
     log "preserved existing SAVE_CONFIG block in deployed printer.cfg"
 fi
 
-
 # Apply permissions.
 log "applying permissions"
 chmod 644 "$TARGET_DIR/dev.py" || fail "chmod failed for dev.py"
 chmod 644 "$TARGET_DIR/kaos_logging.py" || fail "chmod failed for kaos_logging.py"
-chmod 644 "$TARGET_DIR/kaos_translations.py" || fail "chmod failed for kaos_translations.py"
-chmod 755 "$TARGET_DIR/lang" || fail "chmod failed for lang directory"
-chmod 644 "$TARGET_DIR"/lang/*.py || fail "chmod failed for language py files"
+chmod 644 "$TARGET_DIR/cmds.py" || fail "chmod failed for cmds.py"
+chmod 644 "$TARGET_DIR/base.py" || fail "chmod failed for base.py"
+chmod 644 "$TARGET_DIR/cwebsocketapis.py" || fail "chmod failed for cwebsocketapis.py"
 chmod 755 "$CONFIG_DIR/kaos" || fail "chmod failed for KAOS config directory"
 chmod 644 "$CONFIG_DIR"/kaos/*.cfg || fail "chmod failed for split KAOS cfg files"
 chmod 644 "$CONFIG_DIR/kaos.cfg" || fail "chmod failed for kaos.cfg"
@@ -254,28 +566,27 @@ chmod 644 "$INSTALL_LOG" || fail "chmod failed for install log"
 log "verifying install"
 [ -f "$TARGET_DIR/dev.py" ] || fail "Verify failed: missing $TARGET_DIR/dev.py"
 [ -f "$TARGET_DIR/kaos_logging.py" ] || fail "Verify failed: missing $TARGET_DIR/kaos_logging.py"
-[ -f "$TARGET_DIR/kaos_translations.py" ] || fail "Verify failed: missing $TARGET_DIR/kaos_translations.py"
-[ -d "$TARGET_DIR/lang" ] || fail "Verify failed: missing $TARGET_DIR/lang"
+[ -f "$TARGET_DIR/cmds.py" ] || fail "Verify failed: missing $TARGET_DIR/cmds.py"
+[ -f "$TARGET_DIR/base.py" ] || fail "Verify failed: missing $TARGET_DIR/base.py"
+[ -f "$TARGET_DIR/cwebsocketapis.py" ] || fail "Verify failed: missing $TARGET_DIR/cwebsocketapis.py"
 [ -d "$CONFIG_DIR/kaos" ] || fail "Verify failed: missing $CONFIG_DIR/kaos"
 [ -f "$CONFIG_DIR/kaos.cfg" ] || fail "Verify failed: missing $CONFIG_DIR/kaos.cfg"
 [ -f "$CONFIG_DIR/printer.cfg" ] || fail "Verify failed: missing $CONFIG_DIR/printer.cfg"
 [ -f "$CONFIG_DIR/printer_gcode_macro.cfg" ] || fail "Verify failed: missing $CONFIG_DIR/printer_gcode_macro.cfg"
 
 cfg_count=$(find "$CONFIG_DIR/kaos" -maxdepth 1 -type f -name '*.cfg' | wc -l)
-lang_count=$(find "$TARGET_DIR/lang" -maxdepth 1 -type f -name '*.py' | wc -l)
 
 log "installed $cfg_count split KAOS cfg files"
-log "installed $lang_count language py files"
 
 [ "$cfg_count" -gt 0 ] || fail "Verify failed: no split KAOS cfg files installed in $CONFIG_DIR/kaos"
-[ "$lang_count" -gt 0 ] || fail "Verify failed: no language py files installed in $TARGET_DIR/lang"
 
-disable_soft_shutdown
+remove_soft_shutdown
+remove_phone_home
+remove_phrozen_go
 
 {
     echo "KAOS install completed at $(date)"
     echo "cfg_count=$cfg_count"
-    echo "lang_count=$lang_count"
     echo ""
     echo "existing_fila_cut_x_pos=$existing_fila_cut_x_pos"
     echo "fila_cut_x_pos_update_status=$fila_cut_x_pos_update_status"
@@ -289,13 +600,21 @@ disable_soft_shutdown
     fi
     echo "existing_save_config_block_end"
     echo ""
-    echo "soft_shutdown_disable_log_begin"
+    echo "soft_shutdown_remove_log_begin"
     if [ -s "$SOFT_SHUTDOWN_LOG_TMP" ]; then
         cat "$SOFT_SHUTDOWN_LOG_TMP"
     else
         echo "NOT_RUN"
     fi
-    echo "soft_shutdown_disable_log_end"
+    echo "soft_shutdown_remove_log_end"
+    echo ""
+    echo "phone_home_remove_log_begin"
+    if [ -s "$PHONE_HOME_LOG_TMP" ]; then
+        cat "$PHONE_HOME_LOG_TMP"
+    else
+        echo "NOT_RUN"
+    fi
+    echo "phone_home_remove_log_end"
     echo ""
     echo "KAOS_INSTALL_SUCCESS: KAOS install completed"
     echo ""
@@ -304,7 +623,16 @@ disable_soft_shutdown
 
 rm -f "$SAVE_CONFIG_TMP"
 rm -f "$SOFT_SHUTDOWN_LOG_TMP"
+rm -f "$PHONE_HOME_LOG_TMP"
 
 sync
 sleep 2
-reboot
+
+# reboot may live in /sbin which isn't in non-root PATH
+if command -v reboot > /dev/null 2>&1; then
+    reboot
+elif [ -x /sbin/reboot ]; then
+    /sbin/reboot
+else
+    /sbin/shutdown -r now
+fi
