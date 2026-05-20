@@ -1,0 +1,19 @@
+# Pre-commit hooks — only format KAOS overlay files (not vendor reference/).
+# Install:
+#   pipx install pre-commit   (macOS / Linux / Windows — recommended)
+#   brew install pre-commit   (macOS alternative)
+# Then:
+#   pre-commit install
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        files: ^(phrozen_dev|tools)/.*\.py$
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.10.0-1
+    hooks:
+      - id: shfmt
+        files: ^(install|phrozen_dev/serial-screen)/.*\.sh$
+        args: ["-w", "-i", "4", "-sr", "-ci"]
