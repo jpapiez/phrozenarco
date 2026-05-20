@@ -500,12 +500,6 @@ def _kaos_filtered_respond_info(self, msg):
             self.kaos_log(level, message_text, category)
             return
 
-        # LED traces are functional — voronFDM reads them to toggle hardware.
-        # Must pass through raw even though they match the debug-noise prefix.
-        if "LED_" in clean_text:
-            self.KAOS_OriginalRespondInfo(raw_text)
-            return
-
         # Known noisy legacy debug chatter is filtered as DEBUG.
         if self.kaos_is_known_debug_noise(clean_text):
             self.kaos_log("DEBUG", clean_text)
