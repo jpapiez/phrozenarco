@@ -103,9 +103,6 @@ def install_kaos_logging(obj):
     obj.kaos_render_log = _kaos_render_log.__get__(obj, obj.__class__)
     obj.kaos_is_protocol_message = _kaos_is_protocol_message.__get__(obj, obj.__class__)
     obj.kaos_is_ams_state_json = _kaos_is_ams_state_json.__get__(obj, obj.__class__)
-    obj.kaos_is_functional_light_message = _kaos_is_functional_light_message.__get__(
-        obj, obj.__class__
-    )
     obj.kaos_is_hmi_sensitive_message = _kaos_is_hmi_sensitive_message.__get__(obj, obj.__class__)
     obj.kaos_is_silenced_serial_noise = _kaos_is_silenced_serial_noise.__get__(obj, obj.__class__)
     obj.kaos_is_known_debug_noise = _kaos_is_known_debug_noise.__get__(obj, obj.__class__)
@@ -310,30 +307,6 @@ def _kaos_is_ams_state_json(self, msg):
     return any(key in obj for key in KAOS_AMS_STATE_KEYS)
 
 
-def _kaos_is_functional_light_message(self, msg):
-    """Detect Arco light-control traffic that looks like debug but is functional.
-
-    On the Arco, P0 LED_* commands are emitted through the same responder path
-    as ordinary debug chatter. Suppressing these lines in quiet mode can prevent
-    KAOS_LIGHTS_ON/OFF/TOGGLE from working reliably, so they must bypass the
-    log-level filter and pass through to the original responder.
-    """
-    text = str(msg).strip()
-
-    # Common raw vendor trace forms:
-    #   [(cmds.py)Cmds_CmdP0]command='P0 LED_SetState=0'
-    #   [(cmds.py)Cmds_CmdP0]command='P0 LED_State=0'
-    # Also tolerate already-rendered/category-prefixed forms.
-    if "Cmds_CmdP0" in text and "P0 LED_" in text:
-        return True
-
-    # Future-proof direct P0 LED traces if the vendor changes the wrapper text.
-    if re.search(r"\bP0\s+LED_[A-Za-z0-9_]+", text):
-        return True
-
-    return False
-
-
 def _kaos_is_hmi_sensitive_message(self, msg):
     """Detect vendor screen/HMI traffic that must pass through raw.
 
@@ -486,10 +459,6 @@ def _kaos_emit_protocol(self, msg):
 
 
 def _kaos_log(self, level, msg, category=None):
-    # Light-control P0 LED traffic must always pass through regardless of level.
-    if self.kaos_is_functional_light_message(msg):
-        self.kaos_emit_protocol(msg)
-        return
     if self.kaos_should_log(level):
         self.KAOS_OriginalRespondInfo(self.kaos_render_log(level, msg, category))
 
@@ -509,12 +478,6 @@ def _kaos_filtered_respond_info(self, msg):
             self.kaos_emit_protocol(raw_text)
             return
 
-        # Light-control P0 LED traffic looks like debug output but is functional.
-        # It must bypass the filter before classification.
-        if self.kaos_is_functional_light_message(raw_text):
-            self.kaos_emit_protocol(raw_text)
-            return
-
         # Known harmless missing-tty2 noise should be dropped even if tagged ERROR.
         if self.kaos_is_silenced_serial_noise(raw_text):
             return
@@ -530,11 +493,6 @@ def _kaos_filtered_respond_info(self, msg):
         # Screen/HMI-sensitive traffic may also appear after
         # level/category parsing. Still pass it through without KAOS re-rendering.
         if self.kaos_is_hmi_sensitive_message(clean_text):
-            self.kaos_emit_protocol(clean_text)
-            return
-
-        # Light-control P0 LED traffic may also appear after level/category parsing.
-        if self.kaos_is_functional_light_message(clean_text):
             self.kaos_emit_protocol(clean_text)
             return
 
