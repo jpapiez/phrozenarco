@@ -15905,14 +15905,12 @@ class Commands(Base):
     # P0 M3; ;P0 M3;
     # Vendor note (240801): # P0 B?
     def Cmds_CmdP0(self, gcmd):
-        cmd_line = gcmd.get_commandline()
         # LED commands are functional — voronFDM pattern-matches this exact trace
-        # format (including 命令) to toggle hardware GPIO via the screen MCU.
-        # Do NOT translate 命令 to English — it breaks LED control.
-        if "LED_" in cmd_line:
-            self.emit_protocol("[(cmds.py)Cmds_CmdP0]\u547d\u4ee4='%s'" % cmd_line)
-        else:
-            self.kaos_log("DEBUG", "[(cmds.py)Cmds_CmdP0]\u547d\u4ee4='%s'" % cmd_line, "SERIAL")
+        # to toggle hardware GPIO via the screen MCU.
+        # Do NOT translate or reformat this emit — it must match stock exactly.
+        self.G_PhrozenFluiddRespondInfo(
+            "[(cmds.py)Cmds_CmdP0]命令='%s'" % (gcmd.get_commandline(),)
+        )
 
         self.G_PhrozenFluiddRespondInfo("V-H%s-I%s-F%s" % (HW_VERSION, IMAGE_VERSION, FW_VERSION))
 
