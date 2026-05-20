@@ -478,7 +478,7 @@ class Commands(Base):
             "DEBUG", "[(cmds.python)Cmds_P1EnForceForward]Sending command: E%d" % chan, "SERIAL"
         )
 
-        # for UIUX dynamic interface
+        # for UIUX dynamic ∏nterface
         self.emit_channel_op("E", 0, self.G_ChangeChannelTimeoutNewChan)
         # Vendor note (250619): check if AMS reconnected successfully
         self.Cmds_USBConnectErrorCheck()
