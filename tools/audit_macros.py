@@ -35,6 +35,7 @@ Run from the repo root:
 
     python3 tools/audit_macros.py
 """
+
 from __future__ import annotations
 
 import re
@@ -47,22 +48,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from tools.klipper_cfg import Config, load_repo_config, GcodeMacro
 
-
 # ---------------------------------------------------------------------------
 # Patterns
 # ---------------------------------------------------------------------------
 
 # printer["gcode_macro X"].field   or   printer['gcode_macro X'].field
-READ_RE = re.compile(
-    r"""printer\s*\[\s*['"]gcode_macro\s+(\w+)['"]\s*\]\s*\.\s*(\w+)"""
-)
+READ_RE = re.compile(r"""printer\s*\[\s*['"]gcode_macro\s+(\w+)['"]\s*\]\s*\.\s*(\w+)""")
 
 # {% set local = printer["gcode_macro X"] %} — namespace alias; we can't tell
 # which field the local is used for, so we treat this as "macro X is read
 # from" (used for keeping read-only state containers off the dead-macro list).
-NAMESPACE_BIND_RE = re.compile(
-    r"""printer\s*\[\s*['"]gcode_macro\s+(\w+)['"]\s*\](?!\s*\.)"""
-)
+NAMESPACE_BIND_RE = re.compile(r"""printer\s*\[\s*['"]gcode_macro\s+(\w+)['"]\s*\](?!\s*\.)""")
 
 # SET_GCODE_VARIABLE MACRO=X VARIABLE=Y (VALUE=... ignored)
 WRITE_RE = re.compile(
@@ -81,45 +77,170 @@ MACRO_CALL_FIRST_TOKEN_RE = re.compile(r"^\s*([A-Za-z_][\w]*)\b")
 # starts with one of these, do NOT treat it as a macro call.
 BUILTIN_GCODE = {
     # Standard G/M
-    "G0", "G1", "G2", "G3", "G4", "G10", "G11", "G17", "G18", "G19",
-    "G20", "G21", "G28", "G29", "G30", "G31", "G40", "G54", "G80",
-    "G90", "G91", "G92", "G93", "G94",
-    "M0", "M1", "M2", "M17", "M18", "M82", "M83", "M84", "M104", "M105",
-    "M106", "M107", "M109", "M114", "M115", "M117", "M118", "M119",
-    "M140", "M141", "M155", "M190", "M191", "M201", "M202", "M203",
-    "M204", "M205", "M206", "M211", "M218", "M220", "M221", "M226",
-    "M280", "M290", "M303", "M304", "M400", "M401", "M402", "M420",
-    "M500", "M501", "M502", "M503", "M569", "M600", "M701", "M702",
-    "M851", "M900", "M905", "M906", "M907", "M913", "M914", "M915",
-    "M928", "M999",
+    "G0",
+    "G1",
+    "G2",
+    "G3",
+    "G4",
+    "G10",
+    "G11",
+    "G17",
+    "G18",
+    "G19",
+    "G20",
+    "G21",
+    "G28",
+    "G29",
+    "G30",
+    "G31",
+    "G40",
+    "G54",
+    "G80",
+    "G90",
+    "G91",
+    "G92",
+    "G93",
+    "G94",
+    "M0",
+    "M1",
+    "M2",
+    "M17",
+    "M18",
+    "M82",
+    "M83",
+    "M84",
+    "M104",
+    "M105",
+    "M106",
+    "M107",
+    "M109",
+    "M114",
+    "M115",
+    "M117",
+    "M118",
+    "M119",
+    "M140",
+    "M141",
+    "M155",
+    "M190",
+    "M191",
+    "M201",
+    "M202",
+    "M203",
+    "M204",
+    "M205",
+    "M206",
+    "M211",
+    "M218",
+    "M220",
+    "M221",
+    "M226",
+    "M280",
+    "M290",
+    "M303",
+    "M304",
+    "M400",
+    "M401",
+    "M402",
+    "M420",
+    "M500",
+    "M501",
+    "M502",
+    "M503",
+    "M569",
+    "M600",
+    "M701",
+    "M702",
+    "M851",
+    "M900",
+    "M905",
+    "M906",
+    "M907",
+    "M913",
+    "M914",
+    "M915",
+    "M928",
+    "M999",
     # Klipper extras
-    "BED_MESH_CALIBRATE", "BED_MESH_CLEAR", "BED_MESH_PROFILE",
-    "PROBE", "PROBE_ACCURACY", "PROBE_CALIBRATE", "Z_TILT_ADJUST_BASE",
-    "SAVE_CONFIG", "SAVE_GCODE_STATE", "RESTORE_GCODE_STATE",
-    "SET_GCODE_OFFSET", "SET_GCODE_VARIABLE", "SET_KINEMATIC_POSITION",
-    "SET_VELOCITY_LIMIT", "SET_PIN", "SET_FAN_SPEED", "SET_HEATER_TEMPERATURE",
-    "SET_PRESSURE_ADVANCE", "SET_TMC_CURRENT", "SET_FILAMENT_SENSOR",
-    "SET_PRINT_STATS_INFO", "SET_STEPPER_ENABLE", "SDCARD_RESET_FILE",
-    "ACCELEROMETER_QUERY", "ACCELEROMETER_MEASURE",
-    "TEMPERATURE_WAIT", "TURN_OFF_HEATERS", "RESPOND",
-    "FORCE_MOVE", "PID_CALIBRATE", "STEPPER_BUZZ",
-    "RESHAPER_CALIBRATE", "TUNING_TOWER",
+    "BED_MESH_CALIBRATE",
+    "BED_MESH_CLEAR",
+    "BED_MESH_PROFILE",
+    "PROBE",
+    "PROBE_ACCURACY",
+    "PROBE_CALIBRATE",
+    "Z_TILT_ADJUST_BASE",
+    "SAVE_CONFIG",
+    "SAVE_GCODE_STATE",
+    "RESTORE_GCODE_STATE",
+    "SET_GCODE_OFFSET",
+    "SET_GCODE_VARIABLE",
+    "SET_KINEMATIC_POSITION",
+    "SET_VELOCITY_LIMIT",
+    "SET_PIN",
+    "SET_FAN_SPEED",
+    "SET_HEATER_TEMPERATURE",
+    "SET_PRESSURE_ADVANCE",
+    "SET_TMC_CURRENT",
+    "SET_FILAMENT_SENSOR",
+    "SET_PRINT_STATS_INFO",
+    "SET_STEPPER_ENABLE",
+    "SDCARD_RESET_FILE",
+    "ACCELEROMETER_QUERY",
+    "ACCELEROMETER_MEASURE",
+    "TEMPERATURE_WAIT",
+    "TURN_OFF_HEATERS",
+    "RESPOND",
+    "FORCE_MOVE",
+    "PID_CALIBRATE",
+    "STEPPER_BUZZ",
+    "RESHAPER_CALIBRATE",
+    "TUNING_TOWER",
     # Phrozen firmware P-commands (handled by the MKS_THR firmware, not Klipper macros)
-    "P0", "P1", "P2", "P3", "P28",
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P28",
     # Klipper extras for our printer
-    "G0.1", "G1.1", "M84.1", "M99109", "M99190", "G28.1", "G31.1", "BASE_PAUSE",
-    "BASE_RESUME", "BASE_CANCEL_PRINT",
+    "G0.1",
+    "G1.1",
+    "M84.1",
+    "M99109",
+    "M99190",
+    "G28.1",
+    "G31.1",
+    "BASE_PAUSE",
+    "BASE_RESUME",
+    "BASE_CANCEL_PRINT",
     # Slicer placeholder commands embedded in start-gcode
     "SET_PRINT_STATS_INFO",
     # Phrozen Tn (tool change) — handled by phrozen_dev plugin. Bare "T"
     # shows up when the body has T{params.NEXT} (Jinja-templated tool number).
-    "T", "T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9",
-    "T10", "T11", "T12", "T13", "T14", "T15",
+    "T",
+    "T0",
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+    "T8",
+    "T9",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
     # KAOS Python plugin commands (phrozen_dev/extras provide these at runtime;
     # they are not [gcode_macro] entries in our config).
-    "KAOS_LOG", "KAOS_LOG_LEVEL", "KAOS_LOG_FLAGS", "KAOS_LOG_LANGUAGE",
+    "KAOS_LOG",
+    "KAOS_LOG_LEVEL",
+    "KAOS_LOG_FLAGS",
     # Klipper builtins I missed in the first pass
-    "UPDATE_DELAYED_GCODE", "SET_TEMPERATURE_FAN_TARGET",
+    "UPDATE_DELAYED_GCODE",
+    "SET_TEMPERATURE_FAN_TARGET",
 }
 
 
@@ -130,39 +251,83 @@ BUILTIN_GCODE = {
 # them.
 EXTERNAL_ENTRY_POINTS = {
     # Firmware P-command dispatch (phrozen_dev calls these by name)
-    "PG101", "PG102", "PG103", "PG104", "PG105", "PG106", "PG107", "PG108",
-    "PG109", "PG110", "PG111", "PG112", "PG113", "PG114", "PG115", "PG116",
-    "PG117", "PG118", "PG119",
-    "PRZ_SPITTING_SCRAPE",     # has firmware translation entry
-    "PRZ_PAUSE_WAITINGAREA",   # called by phrozen_dev pause-trigger flows
-    "PRZ_PRINTING_START",      # called from G29 and (commented) homing_override
-    "PRZ_MANUAL_WAITING",      # user-triggered manual-feed waiting
+    "PG101",
+    "PG102",
+    "PG103",
+    "PG104",
+    "PG105",
+    "PG106",
+    "PG107",
+    "PG108",
+    "PG109",
+    "PG110",
+    "PG111",
+    "PG112",
+    "PG113",
+    "PG114",
+    "PG115",
+    "PG116",
+    "PG117",
+    "PG118",
+    "PG119",
+    "PRZ_SPITTING_SCRAPE",  # has firmware translation entry
+    "PRZ_PAUSE_WAITINGAREA",  # called by phrozen_dev pause-trigger flows
+    "PRZ_PRINTING_START",  # called from G29 and (commented) homing_override
+    "PRZ_MANUAL_WAITING",  # user-triggered manual-feed waiting
     # Slicer Change-Filament G-code entry
     "TOOLCHANGE",
     "ORCA_PURGE",
     # Slicer start G-code entries
-    "PG28", "G28", "G29", "G30", "G31", "G40",
-    "Z_TILT_ONCE", "Z_TILT_ADJUST", "Z_TILT_CLEAR",
+    "PG28",
+    "G28",
+    "G29",
+    "G30",
+    "G31",
+    "G40",
+    "Z_TILT_ONCE",
+    "Z_TILT_ADJUST",
+    "Z_TILT_CLEAR",
     "BED_MESH_CALIBRATE_CUSTOM",
-    "PRZ_WIPEMOUTH", "PRZ_WAITINGAREA",
-    "TP_OUT", "TP_PUT",
-    "START_PRINT", "PRINT_END", "CANCEL_PRINT",
+    "PRZ_WIPEMOUTH",
+    "PRZ_WAITINGAREA",
+    "TP_OUT",
+    "TP_PUT",
+    "START_PRINT",
+    "PRINT_END",
+    "CANCEL_PRINT",
     # Pause/Resume (Moonraker / fluidd UI)
-    "PAUSE", "PAUSE_PRINTING", "PAUSEMA", "RESUME",
+    "PAUSE",
+    "PAUSE_PRINTING",
+    "PAUSEMA",
+    "RESUME",
     # User-facing controls
-    "M84", "M18", "M106", "M109", "M190", "M303", "M304",
-    "G0", "G1",
+    "M84",
+    "M18",
+    "M106",
+    "M109",
+    "M190",
+    "M303",
+    "M304",
+    "G0",
+    "G1",
     "SCREWS_TILT_CALCULATE",
     "SHAPER_CALIBRATE",
     "AUTHORIZE_POWER_LOSS_RECOVERY",
-    "KAOS_SAFETY_MODE_SAFE", "KAOS_SAFETY_MODE_BULLETPROOF",
-    "KAOS_LIGHTS_ON", "KAOS_LIGHTS_OFF", "KAOS_LIGHTS_TOGGLE",
+    "KAOS_SAFETY_MODE_SAFE",
+    "KAOS_SAFETY_MODE_BULLETPROOF",
+    "KAOS_LIGHTS_ON",
+    "KAOS_LIGHTS_OFF",
+    "KAOS_LIGHTS_TOGGLE",
     "KAOS_BEEP_NOTIFY",
-    "KAOS_SET_LOG_LEVEL", "KAOS_SET_LOG_FLAGS", "KAOS_SET_LOG_LANGUAGE",
+    "KAOS_SET_LOG_LEVEL",
+    "KAOS_SET_LOG_FLAGS",
+    "KAOS_SET_LOG_LANGUAGE",
     "KAOS_TOGGLE_LOG_LEVEL",
-    "KAOS_DYNAMIC_SPEED_ENABLE", "KAOS_DYNAMIC_SPEED_DISABLE",
+    "KAOS_DYNAMIC_SPEED_ENABLE",
+    "KAOS_DYNAMIC_SPEED_DISABLE",
     "DEBUG_TRUST",
-    "probe_up", "probe_off",
+    "probe_up",
+    "probe_off",
     # KAOS_LOG is a Python-side macro provided by the phrozen_dev plugin (not
     # a [gcode_macro] in our config); the wrapper _KAOS_LOG calls it.
 }
@@ -173,16 +338,23 @@ EXTERNAL_ENTRY_POINTS = {
 # blocks. We pre-seed them as "called" so they don't show as dead code.
 CALLED_FROM_NON_MACRO_CONTEXT = {
     # homing_override calls these
-    "_CLEAR_TRUSTED_HOME", "_CLEAR_RECOVERY_AUTH",
+    "_CLEAR_TRUSTED_HOME",
+    "_CLEAR_RECOVERY_AUTH",
     "_KAOS_SAFETY_MODE_ENABLE_INTERNAL_MOTION_BYPASS",
     "_KAOS_SAFETY_MODE_DISABLE_INTERNAL_MOTION_BYPASS",
-    "_SET_TRUSTED_XY", "_SET_TRUSTED_Z", "_SET_TRUSTED_XYZ",
+    "_SET_TRUSTED_XY",
+    "_SET_TRUSTED_Z",
+    "_SET_TRUSTED_XYZ",
     "PRZ_WIPEMOUTH",
     # delayed_gcode and other [...] sections
-    "TURN_ON_LIGHT_AT_BOOT", "LIGHTS_OFF_DELAY",
-    "_KAOS_STARTUP_LOGGING", "startup_beep",
-    "apply_hold_current", "apply_board_fan_target",
-    "DYNAMIC_SPEED_LOOP", "BOARD_FAN_CPU_LOOP",
+    "TURN_ON_LIGHT_AT_BOOT",
+    "LIGHTS_OFF_DELAY",
+    "_KAOS_STARTUP_LOGGING",
+    "startup_beep",
+    "apply_hold_current",
+    "apply_board_fan_target",
+    "DYNAMIC_SPEED_LOOP",
+    "BOARD_FAN_CPU_LOOP",
     "KINEMATIC_POSITION",
     # G/M renames target the original — the renamed macro is the public name
 }
@@ -191,6 +363,7 @@ CALLED_FROM_NON_MACRO_CONTEXT = {
 # ---------------------------------------------------------------------------
 # Analysis
 # ---------------------------------------------------------------------------
+
 
 def strip_comments(line: str) -> str:
     """Strip Klipper-style line/inline comments. Klipper treats # and ; as
@@ -205,15 +378,15 @@ def strip_comments(line: str) -> str:
         c = line[i]
         if in_str:
             out.append(c)
-            if c == in_str and (i == 0 or line[i-1] != "\\"):
+            if c == in_str and (i == 0 or line[i - 1] != "\\"):
                 in_str = None
         elif c in "'\"":
             in_str = c
             out.append(c)
-        elif c == "{" and i + 1 < len(line) and line[i+1] == "%":
+        elif c == "{" and i + 1 < len(line) and line[i + 1] == "%":
             in_jinja += 1
             out.append(c)
-        elif c == "%" and i + 1 < len(line) and line[i+1] == "}" and in_jinja > 0:
+        elif c == "%" and i + 1 < len(line) and line[i + 1] == "}" and in_jinja > 0:
             in_jinja -= 1
             out.append(c)
         elif (c in ";#") and in_jinja == 0:
@@ -250,7 +423,7 @@ def find_calls(macro: GcodeMacro, known_macros: set[str]) -> list[tuple[int, str
             end = line.find("%}")
             if end < 0:
                 break
-            line = line[end+2:].lstrip()
+            line = line[end + 2 :].lstrip()
         if not line:
             continue
         m = MACRO_CALL_FIRST_TOKEN_RE.match(line)
@@ -353,7 +526,7 @@ def find_calls_in_text(text: str, known_macros: set[str]) -> set[str]:
             end = line.find("%}")
             if end < 0:
                 break
-            line = line[end+2:].lstrip()
+            line = line[end + 2 :].lstrip()
         if not line:
             continue
         m = MACRO_CALL_FIRST_TOKEN_RE.match(line)
@@ -370,6 +543,7 @@ def find_calls_in_text(text: str, known_macros: set[str]) -> set[str]:
 # ---------------------------------------------------------------------------
 # Main report
 # ---------------------------------------------------------------------------
+
 
 def is_state_container(macro: GcodeMacro) -> bool:
     """A "state container" macro exists primarily to hold variables for other
@@ -421,9 +595,7 @@ def audit(cfg: Config, verbose: bool = False) -> int:
         if m.rename_existing:
             macro_names.add(m.rename_existing)
 
-    state_containers: set[str] = {
-        n for n, m in macros.items() if is_state_container(m)
-    }
+    state_containers: set[str] = {n for n, m in macros.items() if is_state_container(m)}
 
     # Build call graph (macro -> set of macros it calls)
     call_graph: dict[str, set[str]] = {n: set() for n in macro_names}
@@ -506,7 +678,7 @@ def audit(cfg: Config, verbose: bool = False) -> int:
                 end = line.find("%}")
                 if end < 0:
                     break
-                line = line[end+2:].lstrip()
+                line = line[end + 2 :].lstrip()
             if not line or line.startswith("#"):
                 continue
             tm = MACRO_CALL_FIRST_TOKEN_RE.match(line)
@@ -570,7 +742,9 @@ def audit(cfg: Config, verbose: bool = False) -> int:
             warnings.append(f"  [W] {m.file} {name} has no description: line")
 
     # --- Print report ---
-    print(f"Macros analyzed: {len(macros)}  Sections: {len(cfg.sections)}  Delayed gcodes: {len(cfg.delayed)}")
+    print(
+        f"Macros analyzed: {len(macros)}  Sections: {len(cfg.sections)}  Delayed gcodes: {len(cfg.delayed)}"
+    )
     print(f"Errors: {len(errors)}  Warnings: {len(warnings)}  Info: {len(info)}")
 
     # Errors are always shown (they block ship).
@@ -602,9 +776,14 @@ def audit(cfg: Config, verbose: bool = False) -> int:
 
 if __name__ == "__main__":
     import argparse
+
     p = argparse.ArgumentParser(description="Static audit of every gcode_macro in config/.")
-    p.add_argument("--verbose", "-v", action="store_true",
-                   help="Show all warnings and info; default is errors-only.")
+    p.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show all warnings and info; default is errors-only.",
+    )
     args = p.parse_args()
 
     cfg = load_repo_config(".")

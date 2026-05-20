@@ -1,0 +1,42 @@
+{
+    "name": "filament_unload_pla",
+    "description": "UNLOAD_FILAMENT for PLA. Seeds current material and verifies parse writes, tip-shaping sequence, unload move, and state restore.",
+    "state": {
+        "pos_x": 100,
+        "pos_y": 100,
+        "pos_z": 50,
+        "extruder_temp": 190,
+        "extruder_target": 190
+    },
+    "macro_state_overrides": {
+        "LOAD_FILAMENT": {"current_material": "PLA"}
+    },
+    "current": {
+        "entry_point": "UNLOAD_FILAMENT",
+        "params": {}
+    },
+    "baseline": {
+        "synthetic_sequence": [
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=load_temp VALUE=210"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=unload_temp VALUE=200"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=purge VALUE=40"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=tip VALUE='\"mild\"'"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=load_speed VALUE=800"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=unload_speed VALUE=600"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=coldpull_heat VALUE=210"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=coldpull_pull VALUE=90"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=fastswap VALUE=1"},
+            {"raw": "SET_GCODE_VARIABLE MACRO=_PARSE_MATERIAL VARIABLE=wipe VALUE=0"},
+            {"raw": "SAVE_GCODE_STATE NAME=unload_state"},
+            {"raw": "M104 S200"},
+            {"raw": "M109 S200"},
+            {"raw": "G91"},
+            {"raw": "G92 E0"},
+            {"raw": "G1 E3 F120"},
+            {"raw": "G1 E-5 F300"},
+            {"raw": "G1 E-100 F600"},
+            {"raw": "RESTORE_GCODE_STATE NAME=unload_state"},
+            {"raw": "M117"}
+        ]
+    }
+}

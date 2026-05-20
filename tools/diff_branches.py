@@ -24,6 +24,7 @@ Output:
 Exit code: 0 only if every scenario is PASS or INTENT (with diff matching
 expectation); non-zero if any FAIL.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -40,9 +41,12 @@ import re
 
 from tools.klipper_cfg import Config, load_at_revision, load_repo_config
 from tools.render_macros import (
-    Trace, default_state, render_macro, seed_macro_variables, parse_call_params,
+    Trace,
+    default_state,
+    render_macro,
+    seed_macro_variables,
+    parse_call_params,
 )
-
 
 # ---------------------------------------------------------------------------
 # Filtering: strip the bracket markers and pure-empty lines from a trace so
@@ -118,6 +122,7 @@ def _normalize_command(s: str) -> str:
             return f"{prefix}{v:g}"
         except ValueError:
             return tok
+
     return " ".join(_norm_num(p) for p in s.split())
 
 
@@ -263,6 +268,7 @@ def render_current(cfg: Config, scenario: dict, state: dict) -> Trace:
 # Driver
 # ---------------------------------------------------------------------------
 
+
 def apply_macro_state_overrides(state: dict, overrides: dict) -> None:
     """Apply scenario-supplied gcode_macro variable overrides on top of the
     defaults seeded from cfg.
@@ -312,13 +318,20 @@ def run_one(scenario_path: Path, repo_root: Path, baseline_rev: str) -> dict:
     # Display the baseline ref/SHA naturally: SHAs get truncated, ref names
     # are shown verbatim (so "origin/PhrozenArcoKAOS" doesn't get cut to
     # "origin/P").
-    bl_label = baseline_rev[:8] if all(c in "0123456789abcdef" for c in baseline_rev.lower()) and len(baseline_rev) >= 7 else baseline_rev
-    diff = list(unified_diff(
-        bl_lines, cur_lines,
-        fromfile=f"baseline ({bl_label})",
-        tofile="current (working tree)",
-        lineterm="",
-    ))
+    bl_label = (
+        baseline_rev[:8]
+        if all(c in "0123456789abcdef" for c in baseline_rev.lower()) and len(baseline_rev) >= 7
+        else baseline_rev
+    )
+    diff = list(
+        unified_diff(
+            bl_lines,
+            cur_lines,
+            fromfile=f"baseline ({bl_label})",
+            tofile="current (working tree)",
+            lineterm="",
+        )
+    )
 
     return {
         "name": scenario.get("name", scenario_path.stem),
@@ -337,8 +350,10 @@ def run_one(scenario_path: Path, repo_root: Path, baseline_rev: str) -> dict:
 
 
 def _freeze_hint(name: str, reason_placeholder: str = "describe the change") -> str:
-    return (f"          To accept as intentional, run:\n"
-            f"            python3 tools/freeze_intent.py {name} --reason \"{reason_placeholder}\"")
+    return (
+        f"          To accept as intentional, run:\n"
+        f'            python3 tools/freeze_intent.py {name} --reason "{reason_placeholder}"'
+    )
 
 
 def report(results: list[dict], verbose: bool = False) -> int:
@@ -370,7 +385,7 @@ def report(results: list[dict], verbose: bool = False) -> int:
                 print(f"  - {e}")
             continue
 
-        identical = (r["current_lines"] == r["baseline_lines"])
+        identical = r["current_lines"] == r["baseline_lines"]
         if identical:
             n_pass += 1
             print(f"[PASS]    {name}: byte-identical motion sequence")
@@ -395,15 +410,19 @@ def report(results: list[dict], verbose: bool = False) -> int:
 
             # expect_diff=true but the trace has changed (or no hash recorded).
             n_stale += 1
-            print(f"[STALE_INTENT]  {name}: scenario marked expect_diff but trace has changed since the intent was frozen")
+            print(
+                f"[STALE_INTENT]  {name}: scenario marked expect_diff but trace has changed since the intent was frozen"
+            )
             if not stored_hash:
-                print(f"          (no intent_trace_hash recorded yet — first run after marking expect_diff)")
+                print(
+                    f"          (no intent_trace_hash recorded yet — first run after marking expect_diff)"
+                )
             else:
                 print(f"          stored hash:  {stored_hash}")
                 print(f"          current hash: {current_hash}")
             print(f"          previous explanation: {r['diff_explanation']}")
             print(f"          Re-verify the diff. If still intentional:")
-            print(f"            python3 tools/freeze_intent.py {name} --reason \"...\"")
+            print(f'            python3 tools/freeze_intent.py {name} --reason "..."')
             print()
             for line in r["diff"]:
                 print("    " + line)
@@ -433,19 +452,27 @@ def report(results: list[dict], verbose: bool = False) -> int:
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description="Compare gcode traces between branches.")
     p.add_argument("--repo", default=".", help="Repo root")
-    p.add_argument("--baseline", default="origin/main",
-                   help="Baseline git revision to compare against (default: origin/main; "
-                        "use any ref e.g. main, HEAD~1, a tag, or a SHA).")
-    p.add_argument("--scenarios", default="tests/scenarios",
-                   help="Directory of scenario JSON files")
-    p.add_argument("--scenario", default=None,
-                   help="Run a single scenario by name (without .json)")
-    p.add_argument("--show-traces", action="store_true",
-                   help="Print full traces, not just diffs")
-    p.add_argument("--verbose", "-v", action="store_true",
-                   help="For [INTENT] scenarios, also print the actual unified diff. "
-                        "Default prints the verdict + explanation but suppresses the "
-                        "diff body. FAIL diffs are always shown in full.")
+    p.add_argument(
+        "--baseline",
+        default="origin/main",
+        help="Baseline git revision to compare against (default: origin/main; "
+        "use any ref e.g. main, HEAD~1, a tag, or a SHA).",
+    )
+    p.add_argument(
+        "--scenarios",
+        default="tests/scenarios",
+        help="Directory of scenario JSON files",
+    )
+    p.add_argument("--scenario", default=None, help="Run a single scenario by name (without .json)")
+    p.add_argument("--show-traces", action="store_true", help="Print full traces, not just diffs")
+    p.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="For [INTENT] scenarios, also print the actual unified diff. "
+        "Default prints the verdict + explanation but suppresses the "
+        "diff body. FAIL diffs are always shown in full.",
+    )
     args = p.parse_args(argv)
 
     scenario_dir = Path(args.repo) / args.scenarios

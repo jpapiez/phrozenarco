@@ -30,6 +30,7 @@ effects (SET_GCODE_VARIABLE).
 
 The output is suitable for byte-for-byte diffing between branches.
 """
+
 from __future__ import annotations
 
 import re
@@ -46,10 +47,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from tools.klipper_cfg import Config, GcodeMacro
 
-
 # ---------------------------------------------------------------------------
 # Jinja-friendly state wrapper
 # ---------------------------------------------------------------------------
+
 
 class Box:
     """Recursive dict <-> attribute/item wrapper.
@@ -58,6 +59,7 @@ class Box:
     `printer["gcode_macro X"].variable_name` (item access then attribute). One
     wrapper that supports both, falling back to the underlying dict.
     """
+
     __slots__ = ("_data",)
 
     def __init__(self, data: dict | Any):
@@ -91,6 +93,7 @@ class Box:
 # State / scenario
 # ---------------------------------------------------------------------------
 
+
 def default_state(
     *,
     pos_x: float = 100.0,
@@ -122,7 +125,11 @@ def default_state(
             "max_velocity": max_velocity,
             "max_accel": max_accel,
             "max_accel_to_decel": max_accel_to_decel,
-            "axis_maximum": {"x": x_position_max, "y": y_position_max, "z": z_position_max},
+            "axis_maximum": {
+                "x": x_position_max,
+                "y": y_position_max,
+                "z": z_position_max,
+            },
             "extruder": "extruder",
         },
         "gcode_move": {
@@ -159,7 +166,7 @@ def seed_macro_variables(state: dict, cfg: Config) -> None:
         for key, raw in m.variables.items():
             if not key.startswith("variable_"):
                 continue
-            varname = key[len("variable_"):]
+            varname = key[len("variable_") :]
             ns[varname] = _coerce_value(raw)
 
 
@@ -185,6 +192,7 @@ def _coerce_value(raw: str) -> Any:
 # ---------------------------------------------------------------------------
 # Jinja env & rendering
 # ---------------------------------------------------------------------------
+
 
 def _make_env() -> Environment:
     """Build a Jinja2 environment that matches Klipper's template syntax.
@@ -224,12 +232,14 @@ def _make_env() -> Environment:
     def _noop(*a, **kw):
         return ""
 
-    env.globals.update({
-        "action_respond_info": _noop,
-        "action_raise_error": _noop,
-        "action_emergency_stop": _noop,
-        "action_call_remote_method": _noop,
-    })
+    env.globals.update(
+        {
+            "action_respond_info": _noop,
+            "action_raise_error": _noop,
+            "action_emergency_stop": _noop,
+            "action_call_remote_method": _noop,
+        }
+    )
     return env
 
 
@@ -298,7 +308,11 @@ def parse_call_params(line: str) -> dict:
         rest,
     ):
         key = m.group(1)
-        val = m.group(3) if m.group(3) is not None else (m.group(4) if m.group(4) is not None else m.group(5))
+        val = (
+            m.group(3)
+            if m.group(3) is not None
+            else (m.group(4) if m.group(4) is not None else m.group(5))
+        )
         out[key] = val
         consumed_spans.append((m.start(), m.end()))
 
@@ -324,6 +338,7 @@ class Trace:
     .errors is any rendering errors encountered (Jinja undefined, missing
     macros, etc.).
     """
+
     lines: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     call_stack: list[str] = field(default_factory=list)
@@ -428,10 +443,22 @@ def render_macro(
                         continue
                     sub_params = parse_call_params(line)
                     # Mark the call site for diff readability
-                    trace.lines.append(f"--> {tok}" + (" " + " ".join(f"{k}={v}" for k, v in sub_params.items()) if sub_params else ""))
+                    trace.lines.append(
+                        f"--> {tok}"
+                        + (
+                            " " + " ".join(f"{k}={v}" for k, v in sub_params.items())
+                            if sub_params
+                            else ""
+                        )
+                    )
                     render_macro(
-                        cfg, tok, sub_params, state,
-                        trace=trace, depth=depth + 1, include_action=include_action,
+                        cfg,
+                        tok,
+                        sub_params,
+                        state,
+                        trace=trace,
+                        depth=depth + 1,
+                        include_action=include_action,
                     )
                     trace.lines.append(f"<-- {tok}")
                     continue
@@ -453,17 +480,32 @@ def render_macro(
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def cli(argv: list[str]) -> int:
     import argparse, json
+
     p = argparse.ArgumentParser(description="Render a Klipper gcode_macro to a flat trace.")
     p.add_argument("macro", help="entry-point macro name (e.g. TOOLCHANGE)")
-    p.add_argument("--params", default="{}", help="JSON dict of macro params (e.g. '{\"NEXT\":1,\"FLUSH\":50}')")
-    p.add_argument("--state", default=None, help="Path to JSON file overriding default state values")
+    p.add_argument(
+        "--params",
+        default="{}",
+        help='JSON dict of macro params (e.g. \'{"NEXT":1,"FLUSH":50}\')',
+    )
+    p.add_argument(
+        "--state",
+        default=None,
+        help="Path to JSON file overriding default state values",
+    )
     p.add_argument("--repo", default=".", help="Repo root (default: cwd)")
-    p.add_argument("--revision", default=None, help="git revision to load config from (default: working tree)")
+    p.add_argument(
+        "--revision",
+        default=None,
+        help="git revision to load config from (default: working tree)",
+    )
     args = p.parse_args(argv)
 
     from tools.klipper_cfg import load_repo_config, load_at_revision
+
     if args.revision:
         cfg = load_at_revision(args.repo, args.revision)
     else:

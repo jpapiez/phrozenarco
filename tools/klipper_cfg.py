@@ -11,13 +11,13 @@ Only [gcode_macro NAME], [delayed_gcode NAME], and a few other section types
 are exposed in detail; the rest are returned as opaque blobs so the parser
 doesn't break on Klipper extensions we don't care about.
 """
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
-
 
 SECTION_RE = re.compile(r"^\[([\w_]+)(?:\s+([^\]]+))?\]\s*$")
 OPTION_RE = re.compile(r"^([a-zA-Z_][\w]*)\s*[:=]\s*(.*?)\s*$")
@@ -26,13 +26,13 @@ GCODE_KEY_RE = re.compile(r"^gcode\s*:\s*(.*)$")
 
 @dataclass
 class GcodeMacro:
-    name: str                           # e.g. "PG101"
+    name: str  # e.g. "PG101"
     description: str = ""
     variables: dict[str, str] = field(default_factory=dict)  # variable_X -> raw value string
     rename_existing: str | None = None
-    body: str = ""                      # raw gcode body
-    body_start_line: int = 0            # 1-indexed line in source file
-    file: str = ""                      # source file path
+    body: str = ""  # raw gcode body
+    body_start_line: int = 0  # 1-indexed line in source file
+    file: str = ""  # source file path
 
 
 @dataclass
@@ -47,8 +47,9 @@ class DelayedGcode:
 @dataclass
 class Section:
     """A non-macro section we don't care about in detail; keep options as a dict."""
-    kind: str                           # e.g. "stepper_z", "extruder", "printer"
-    label: str = ""                     # e.g. "stepper_z" -> ""; "tmc5160 stepper_x" -> "stepper_x"
+
+    kind: str  # e.g. "stepper_z", "extruder", "printer"
+    label: str = ""  # e.g. "stepper_z" -> ""; "tmc5160 stepper_x" -> "stepper_x"
     options: dict[str, str] = field(default_factory=dict)
     file: str = ""
 
@@ -56,6 +57,7 @@ class Section:
 @dataclass
 class Config:
     """Parsed view of the union of all .cfg files we loaded."""
+
     macros: dict[str, GcodeMacro] = field(default_factory=dict)
     delayed: dict[str, DelayedGcode] = field(default_factory=dict)
     sections: list[Section] = field(default_factory=list)
@@ -188,12 +190,14 @@ def add_cfg(cfg: Config, path: str | Path) -> None:
                 file=str(p),
             )
         else:
-            cfg.sections.append(Section(
-                kind=kind,
-                label=label,
-                options=options,
-                file=str(p),
-            ))
+            cfg.sections.append(
+                Section(
+                    kind=kind,
+                    label=label,
+                    options=options,
+                    file=str(p),
+                )
+            )
 
 
 def load_repo_config(repo_root: str | Path, cfg_files: Iterable[str] | None = None) -> Config:
@@ -218,6 +222,7 @@ def load_repo_config(repo_root: str | Path, cfg_files: Iterable[str] | None = No
             "config/kaos/kaos_screws_tilt.cfg",
             "config/kaos/kaos_dynamic_speed.cfg",
             "config/kaos/kaos_debug.cfg",
+            "config/kaos/kaos_filament.cfg",
             "config/kaos/magic_ams_by_chris.cfg",
         ]
     cfg = Config()
@@ -228,13 +233,16 @@ def load_repo_config(repo_root: str | Path, cfg_files: Iterable[str] | None = No
     return cfg
 
 
-def load_at_revision(repo_root: str | Path, revision: str, cfg_files: Iterable[str] | None = None) -> Config:
+def load_at_revision(
+    repo_root: str | Path, revision: str, cfg_files: Iterable[str] | None = None
+) -> Config:
     """Load config at a specific git revision via `git show`.
 
     Files that don't exist at that revision are silently skipped (so we can
     compare older revisions that lacked some files).
     """
     import subprocess
+
     if cfg_files is None:
         cfg_files = [
             "config/printer.cfg",
@@ -251,6 +259,7 @@ def load_at_revision(repo_root: str | Path, revision: str, cfg_files: Iterable[s
             "config/kaos/kaos_screws_tilt.cfg",
             "config/kaos/kaos_dynamic_speed.cfg",
             "config/kaos/kaos_debug.cfg",
+            "config/kaos/kaos_filament.cfg",
             "config/kaos/magic_ams_by_chris.cfg",
         ]
     cfg = Config()
@@ -258,12 +267,15 @@ def load_at_revision(repo_root: str | Path, revision: str, cfg_files: Iterable[s
         try:
             text = subprocess.check_output(
                 ["git", "-C", str(repo_root), "show", f"{revision}:{rel}"],
-                text=True, encoding="utf-8", stderr=subprocess.DEVNULL,
+                text=True,
+                encoding="utf-8",
+                stderr=subprocess.DEVNULL,
             )
         except subprocess.CalledProcessError:
             continue  # file didn't exist at that revision
         # add_cfg expects a path; write to a temp file
         import tempfile
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".cfg", delete=False) as tf:
             tf.write(text)
             tmp_path = tf.name
@@ -282,5 +294,6 @@ def load_at_revision(repo_root: str | Path, revision: str, cfg_files: Iterable[s
                     s.file = rel
         finally:
             import os
+
             os.unlink(tmp_path)
     return cfg

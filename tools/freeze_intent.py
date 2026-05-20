@@ -26,6 +26,7 @@ Workflow:
 
 Run `python3 tools/freeze_intent.py --help` for arg details.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -36,8 +37,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from tools.diff_branches import (
-    apply_macro_state_overrides, filter_intentional, filter_motion,
-    render_baseline, render_current, run_startup_delayed_gcodes, trace_hash,
+    apply_macro_state_overrides,
+    filter_intentional,
+    filter_motion,
+    render_baseline,
+    render_current,
+    run_startup_delayed_gcodes,
+    trace_hash,
 )
 from tools.klipper_cfg import load_repo_config
 from tools.render_macros import default_state, seed_macro_variables
@@ -89,15 +95,23 @@ def main(argv: list[str]) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    p.add_argument("scenario",
-                   help="Scenario name (without .json) or path to the scenario JSON file.")
-    p.add_argument("--reason", "-r", required=True,
-                   help="Human-readable explanation: WHY does this scenario differ from baseline? "
-                        "Will be shown in verify output. Be specific.")
-    p.add_argument("--scenarios", default="tests/scenarios",
-                   help="Scenario directory (default: tests/scenarios)")
-    p.add_argument("--repo", default=".",
-                   help="Repo root (default: cwd)")
+    p.add_argument(
+        "scenario",
+        help="Scenario name (without .json) or path to the scenario JSON file.",
+    )
+    p.add_argument(
+        "--reason",
+        "-r",
+        required=True,
+        help="Human-readable explanation: WHY does this scenario differ from baseline? "
+        "Will be shown in verify output. Be specific.",
+    )
+    p.add_argument(
+        "--scenarios",
+        default="tests/scenarios",
+        help="Scenario directory (default: tests/scenarios)",
+    )
+    p.add_argument("--repo", default=".", help="Repo root (default: cwd)")
     args = p.parse_args(argv)
 
     repo = Path(args.repo)
