@@ -6,7 +6,7 @@
 # This keeps phrozen_install.sh as the single source of truth for installation.
 #
 # One-liner to run from the printer's SSH session:
-#   wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/dev/kaos-filament-startup-guards/tools/dev_deploy.sh | sh
+#   wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/main/tools/dev_deploy.sh | sh
 #
 # Or with a specific branch:
 #   wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/main/tools/dev_deploy.sh | sh -s -- --branch main
@@ -31,7 +31,7 @@ set -eu
 # --- Configuration -----------------------------------------------------------
 
 GITHUB_REPO="jpapiez/phrozenarco"
-BRANCH="dev/kaos-filament-startup-guards"
+BRANCH="main"
 
 # --- Parse arguments ---------------------------------------------------------
 
