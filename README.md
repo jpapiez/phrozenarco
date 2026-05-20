@@ -265,6 +265,21 @@ wget -qO- https://raw.githubusercontent.com/jpapiez/phrozenarco/main/tools/dev_d
 
 ## Releases
 
+### Branch strategy
+
+| Branch | Purpose |
+|--------|---------|
+| `dev` | Active development. Feature branches merge here. |
+| `main` | Integration-stable. PRs from `dev` land here after review. |
+| `release/<kaos-version>` | Cut from `main` for final QA. Tags are applied here. |
+
+Workflow:
+1. Feature work on `dev` (or feature branches off `dev`)
+2. Merge `dev` → `main` via PR when stable
+3. Cut `release/0.9.7` (or similar) from `main`
+4. Final QA on the release branch; tag when ready (`1.9.9-k0.9.7`)
+5. Build from the tag
+
 ### Tag format
 
 Release tags must use the format **`<firmware>-k<kaos>`**, where the firmware portion is dotted-numeric. The firmware-prefix is mandatory: every release explicitly names the Phrozen firmware version it targets and requires. Order mirrors the output zip filename (firmware first, then KAOS).
