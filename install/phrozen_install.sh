@@ -113,6 +113,8 @@ remove_soft_shutdown() {
 }
 
 PHONE_HOME_LOG_TMP="/tmp/kaos_phone_home_$$.log"
+UPDATE_MGR_LOG_TMP="/tmp/kaos_update_mgr_$$.log"
+MOONRAKER_CONF="$CONFIG_DIR/moonraker.conf"
 
 ph_log() {
     log "$*"
@@ -277,6 +279,72 @@ remove_phrozen_go() {
     ph_log "phrozen_go_remove_end"
 }
 
+# --- Enable Moonraker update managers for Mainsail and Fluidd -----------------
+# Appends [update_manager mainsail] and [update_manager fluidd] sections to
+# moonraker.conf if they don't already exist. This lets both web UIs self-update
+# through their built-in update panels.
+
+um_log() {
+    log "$*"
+    echo "$*" >> "$UPDATE_MGR_LOG_TMP" 2> /dev/null || true
+}
+
+enable_update_managers() {
+    um_log "update_manager_begin"
+
+    if [ ! -f "$MOONRAKER_CONF" ]; then
+        um_log "update_manager_moonraker_conf=not_found"
+        um_log "update_manager_status=skipped"
+        um_log "update_manager_end"
+        return
+    fi
+
+    # Back up moonraker.conf before modifying.
+    backup_file "$MOONRAKER_CONF"
+
+    # Mainsail update manager
+    if grep -q '\[update_manager mainsail\]' "$MOONRAKER_CONF" 2> /dev/null; then
+        um_log "update_manager_mainsail=already_present"
+    else
+        um_log "update_manager_mainsail=adding"
+        cat >> "$MOONRAKER_CONF" << 'MAINSAIL_EOF'
+
+[update_manager mainsail]
+type: web
+channel: stable
+repo: mainsail-crew/mainsail
+path: ~/mainsail
+MAINSAIL_EOF
+        if grep -q '\[update_manager mainsail\]' "$MOONRAKER_CONF" 2> /dev/null; then
+            um_log "update_manager_mainsail=added"
+        else
+            um_log "update_manager_mainsail=add_failed"
+        fi
+    fi
+
+    # Fluidd update manager
+    if grep -q '\[update_manager fluidd\]' "$MOONRAKER_CONF" 2> /dev/null; then
+        um_log "update_manager_fluidd=already_present"
+    else
+        um_log "update_manager_fluidd=adding"
+        cat >> "$MOONRAKER_CONF" << 'FLUIDD_EOF'
+
+[update_manager fluidd]
+type: web
+channel: stable
+repo: fluidd-core/fluidd
+path: ~/fluidd
+FLUIDD_EOF
+        if grep -q '\[update_manager fluidd\]' "$MOONRAKER_CONF" 2> /dev/null; then
+            um_log "update_manager_fluidd=added"
+        else
+            um_log "update_manager_fluidd=add_failed"
+        fi
+    fi
+
+    um_log "update_manager_end"
+}
+
 # Use the directory containing this installer as the source package directory.
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" 2> /dev/null && pwd)
 SOURCE_DIR="$SCRIPT_DIR"
@@ -407,6 +475,21 @@ if $WHATIF; then
     log "    - Remove: /etc/frp/ (if exists)"
     log "    - Patch: $TARGET_DIR/start.sh (comment out phone-home lines)"
     log "    - Patch: /home/mks/KlipperScreen/scripts/KlipperScreen-start.sh"
+    log "  [UPDATE_MANAGER] Enable Moonraker update managers for Mainsail and Fluidd:"
+    if [ -f "$MOONRAKER_CONF" ]; then
+        if grep -q '\[update_manager mainsail\]' "$MOONRAKER_CONF" 2> /dev/null; then
+            log "    - Mainsail: already present"
+        else
+            log "    - Mainsail: [APPEND] [update_manager mainsail] to moonraker.conf"
+        fi
+        if grep -q '\[update_manager fluidd\]' "$MOONRAKER_CONF" 2> /dev/null; then
+            log "    - Fluidd: already present"
+        else
+            log "    - Fluidd: [APPEND] [update_manager fluidd] to moonraker.conf"
+        fi
+    else
+        log "    - moonraker.conf not found at $MOONRAKER_CONF — skipped"
+    fi
     log "  [REBOOT] System reboot"
     log ""
     log "============================================================"
@@ -583,6 +666,7 @@ log "installed $cfg_count split KAOS cfg files"
 remove_soft_shutdown
 remove_phone_home
 remove_phrozen_go
+enable_update_managers
 
 {
     echo "KAOS install completed at $(date)"
@@ -616,6 +700,14 @@ remove_phrozen_go
     fi
     echo "phone_home_remove_log_end"
     echo ""
+    echo "update_manager_log_begin"
+    if [ -s "$UPDATE_MGR_LOG_TMP" ]; then
+        cat "$UPDATE_MGR_LOG_TMP"
+    else
+        echo "NOT_RUN"
+    fi
+    echo "update_manager_log_end"
+    echo ""
     echo "KAOS_INSTALL_SUCCESS: KAOS install completed"
     echo ""
     echo "Rebooting printer after KAOS install at $(date)"
@@ -624,6 +716,7 @@ remove_phrozen_go
 rm -f "$SAVE_CONFIG_TMP"
 rm -f "$SOFT_SHUTDOWN_LOG_TMP"
 rm -f "$PHONE_HOME_LOG_TMP"
+rm -f "$UPDATE_MGR_LOG_TMP"
 
 sync
 sleep 2
