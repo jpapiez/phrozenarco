@@ -36,9 +36,10 @@ class PhrozenDev(Apis):
         self.WebsocketAPIs_RegisterAPIs()
 
         # dev.py;test command PRZ_TEST
-        self.G_PhrozenGCode.register_command(
-            "PRZ_TEST", self.Device_CmdPhrozenTest, desc="Phrozen AMS unit test command"
-        )
+        if self.G_EnableDebugCommands:
+            self.G_PhrozenGCode.register_command(
+                "PRZ_TEST", self.Device_CmdPhrozenTest, desc="Phrozen AMS unit test command"
+            )
 
     # AMS reset parameters
     def Device_ResetParams(self):

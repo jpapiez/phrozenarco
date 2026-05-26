@@ -3549,9 +3549,7 @@ class Commands(Base):
                 # G90
                 # G91
                 G1 Z-%f F8000
-                """ % (
-                self.G_AMSFilaCutZPositionLiftingUp,
-            )
+                """ % (self.G_AMSFilaCutZPositionLiftingUp,)
             self.G_PhrozenGCode.run_script_from_command(command_string)
             self.G_IfZPositionLiftUpFlag = False
             self.kaos_log(
@@ -3631,9 +3629,7 @@ class Commands(Base):
                 # G90
                 # G91
                 G1 Z-%f F8000
-                """ % (
-                self.G_AMSFilaCutZPositionLiftingUp,
-            )
+                """ % (self.G_AMSFilaCutZPositionLiftingUp,)
             self.G_PhrozenGCode.run_script_from_command(command_string)
             self.G_IfZPositionLiftUpFlag = False
             self.kaos_log(
@@ -3862,9 +3858,7 @@ class Commands(Base):
                     # G90
                     # G91
                     G1 Z-%f F8000
-                    """ % (
-                    self.G_AMSFilaCutZPositionLiftingUp,
-                )
+                    """ % (self.G_AMSFilaCutZPositionLiftingUp,)
                 self.G_PhrozenGCode.run_script_from_command(command_string)
                 self.G_IfZPositionLiftUpFlag = False
                 self.kaos_log(
@@ -4333,9 +4327,7 @@ class Commands(Base):
                     # G90
                     # G91
                     G1 Z-%f F8000
-                    """ % (
-                    self.G_AMSFilaCutZPositionLiftingUp,
-                )
+                    """ % (self.G_AMSFilaCutZPositionLiftingUp,)
                 self.G_PhrozenGCode.run_script_from_command(command_string)
                 self.G_IfZPositionLiftUpFlag = False
                 self.kaos_log(
@@ -4755,9 +4747,7 @@ class Commands(Base):
                         # G90
                         # G91
                         G1 Z%f F8000
-                        """ % (
-            self.G_AMSFilaCutZPositionLiftingUp,
-        )
+                        """ % (self.G_AMSFilaCutZPositionLiftingUp,)
         self.G_PhrozenGCode.run_script_from_command(command_string)
         self.Lo_ThisIfZPositionLiftUpFlag = True
         self.kaos_log(
@@ -4883,9 +4873,7 @@ class Commands(Base):
                                 # G90
                                 # G91
                                 G1 Z-%f F8000
-                                """ % (
-                    self.G_AMSFilaCutZPositionLiftingUp,
-                )
+                                """ % (self.G_AMSFilaCutZPositionLiftingUp,)
                 self.G_PhrozenGCode.run_script_from_command(command_string)
                 self.Lo_ThisIfZPositionLiftUpFlag = False
                 self.kaos_log(
@@ -4965,9 +4953,7 @@ class Commands(Base):
                             # G90
                             # G91
                             G1 Z-%f F8000
-                            """ % (
-                self.G_AMSFilaCutZPositionLiftingUp,
-            )
+                            """ % (self.G_AMSFilaCutZPositionLiftingUp,)
             self.G_PhrozenGCode.run_script_from_command(command_string)
             self.Lo_ThisIfZPositionLiftUpFlag = False
             self.kaos_log(
@@ -6113,9 +6099,7 @@ class Commands(Base):
                         # G90
                         # G91
                         G1 Z-%f F8000
-                        """ % (
-                        self.G_AMSFilaCutZPositionLiftingUp,
-                    )
+                        """ % (self.G_AMSFilaCutZPositionLiftingUp,)
                     self.G_PhrozenGCode.run_script_from_command(command_string)
                     self.G_IfZPositionLiftUpFlag = False
                     self.kaos_log(
@@ -6493,9 +6477,7 @@ class Commands(Base):
                     # G90
                     # G91
                     G1 Z-%f F8000
-                    """ % (
-                    self.G_AMSFilaCutZPositionLiftingUp,
-                )
+                    """ % (self.G_AMSFilaCutZPositionLiftingUp,)
                 self.G_PhrozenGCode.run_script_from_command(command_string)
                 self.G_IfZPositionLiftUpFlag = False
                 self.kaos_log(
@@ -16720,102 +16702,107 @@ class Commands(Base):
         self.kaos_log(
             "DEBUG", "[(cmds.python)Cmds_RegisterCmds]register Phrozen gcode command", "SERIAL"
         )
-        # P114 S;;"SB";
-        # P114; ;"SD";
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP114["cmd"],
-            self.Cmds_CmdP114,
-            desc=G_DictPhrozenCmdP114["desc"],
-        )
-        # P28 device
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP28["cmd"],
-            self.Cmds_CmdP28,
-            desc=G_DictPhrozenCmdP28["desc"],
-        )
-        # P29 disconnect
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP29["cmd"],
-            self.Cmds_CmdP29,
-            desc=G_DictPhrozenCmdP29["desc"],
-        )
-        # P30 deviceID(device);"I";deviceID
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP30["cmd"],
-            self.Cmds_CmdP30,
-            desc=G_DictPhrozenCmdP30["desc"],
-        )
-        # P0 M1;(device) Yes;"MC";
-        # P0 M2;refill mode(device);"MA";
-        # P0 M3;
-        # Vendor note (240801): # P0 B?; ;
+        ams_ui_enabled = self.G_AmsAttached
+        debug_cmds_enabled = self.G_EnableDebugCommands
+
+        # Keep P0 always available (e.g. LED_SetState for chamber lights),
+        # while AMS-specific M-subcommands are still runtime-gated in Cmds_CmdP0.
         self.G_PhrozenGCode.register_command(
             G_DictPhrozenP0["cmd"], self.Cmds_CmdP0, desc=G_DictPhrozenP0["desc"]
         )
-        # P2 A1 retract to parkposition Yes;====="AP";
-        # P2 A2;exitfilament Yes;"CL";
-        # P2 A3 filament
-        # P2 A4 filamentfilament
-        # P2 A5 completefilamentfilament,cannot
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP2["cmd"], self.Cmds_CmdP2, desc=G_DictPhrozenCmdP2["desc"]
-        )
-        # P1 S0 , canretract to park;====="RD";
-        # P1 T[n]n:1 ~32(device,1 ~4),();====="T";
-        # P1 B[n]n:1 ~32(device,1 ~4)exit Yes;====="B";
-        # P1 D[n];n:1~32(device,1~4); Yes;====="P";
-        # P1 C[n] n:1~32(device,1~4) (,, , );====="T";
-        # Vendor note (231202): # P1 E[n];n:1~32(device,1~4);,need Yes;====="E?";
-        # Vendor note (240228): distance,needstm32distance
-        # P1 G[n];n:1~32(device,1~4);distance Yes;====="G?";
-        # Vendor note (240319): phase,
-        # =====P1 H[n];n:1~32(device,1~4);phase, Yes;====="H?";
-        # Vendor note (240329): # =====P1 I[n];stm32need;====="I?";
-        # =====P1 J[n];;;
-        # =====P1 K[n];
-        # =====P1 L[n];
-        # =====P1 M[n];
-        # =====P1 N[n];
-        # =====P1 O[n];
-        # =====P1 Q[n];
-        # =====P1 U[n];
-        # Vendor note (240418): # =====P1 V[n];
-        # =====P1 W[n];
-        # =====P1 X[n];
-        # =====P1 Y[n];
-        # =====P1 Z[n];
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP1["cmd"], self.Cmds_CmdP1, desc=G_DictPhrozenCmdP1["desc"]
-        )
-        # P9 X[x_pos]Y[y_pos]W[width]H[height]D[0/1];x_pos:Xcoordinatesy_pos:Ycoordinateswidth:
-        # height:D0:XYcount(default)D1:YXcountwaiting area
-        # P9 T[expire]A[0/1];expire:time,(default60)A0:,continue(default)A1:
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP9["cmd"], self.Cmds_CmdP9, desc=G_DictPhrozenCmdP9["desc"]
-        )
 
-        # Vendor note (241101): # P10 S?    parameterS[1,5]:control,S1-1,S2-2...,5
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP10["cmd"],
-            self.Cmds_CmdP10,
-            desc=G_DictPhrozenCmdP10["desc"],
-        )
+        if ams_ui_enabled:
+            # P114 S;;"SB";
+            # P114; ;"SD";
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP114["cmd"],
+                self.Cmds_CmdP114,
+                desc=G_DictPhrozenCmdP114["desc"],
+            )
+            # P28 device
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP28["cmd"],
+                self.Cmds_CmdP28,
+                desc=G_DictPhrozenCmdP28["desc"],
+            )
+            # P29 disconnect
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP29["cmd"],
+                self.Cmds_CmdP29,
+                desc=G_DictPhrozenCmdP29["desc"],
+            )
+            # P30 deviceID(device);"I";deviceID
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP30["cmd"],
+                self.Cmds_CmdP30,
+                desc=G_DictPhrozenCmdP30["desc"],
+            )
+            # P2 A1 retract to parkposition Yes;====="AP";
+            # P2 A2;exitfilament Yes;"CL";
+            # P2 A3 filament
+            # P2 A4 filamentfilament
+            # P2 A5 completefilamentfilament,cannot
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP2["cmd"], self.Cmds_CmdP2, desc=G_DictPhrozenCmdP2["desc"]
+            )
+            # P1 S0 , canretract to park;====="RD";
+            # P1 T[n]n:1 ~32(device,1 ~4),();====="T";
+            # P1 B[n]n:1 ~32(device,1 ~4)exit Yes;====="B";
+            # P1 D[n];n:1~32(device,1~4); Yes;====="P";
+            # P1 C[n] n:1~32(device,1~4) (,, , );====="T";
+            # Vendor note (231202): # P1 E[n];n:1~32(device,1~4);,need Yes;====="E?";
+            # Vendor note (240228): distance,needstm32distance
+            # P1 G[n];n:1~32(device,1~4);distance Yes;====="G?";
+            # Vendor note (240319): phase,
+            # =====P1 H[n];n:1~32(device,1~4);phase, Yes;====="H?";
+            # Vendor note (240329): # =====P1 I[n];stm32need;====="I?";
+            # =====P1 J[n];;;
+            # =====P1 K[n];
+            # =====P1 L[n];
+            # =====P1 M[n];
+            # =====P1 N[n];
+            # =====P1 O[n];
+            # =====P1 Q[n];
+            # =====P1 U[n];
+            # Vendor note (240418): # =====P1 V[n];
+            # =====P1 W[n];
+            # =====P1 X[n];
+            # =====P1 Y[n];
+            # =====P1 Z[n];
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP1["cmd"], self.Cmds_CmdP1, desc=G_DictPhrozenCmdP1["desc"]
+            )
+            # P9 X[x_pos]Y[y_pos]W[width]H[height]D[0/1];x_pos:Xcoordinatesy_pos:Ycoordinateswidth:
+            # height:D0:XYcount(default)D1:YXcountwaiting area
+            # P9 T[expire]A[0/1];expire:time,(default60)A0:,continue(default)A1:
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP9["cmd"], self.Cmds_CmdP9, desc=G_DictPhrozenCmdP9["desc"]
+            )
 
-        # Vendor note (250805): # P11
-        self.G_PhrozenGCode.register_command("P11", self.Cmds_CmdP11, desc="P11")
-        # Vendor note (250805): # P12 loop
-        self.G_PhrozenGCode.register_command("P12", self.Cmds_CmdP12, desc="P12")
+            # Vendor note (241101): # P10 S?    parameterS[1,5]:control,S1-1,S2-2...,5
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP10["cmd"],
+                self.Cmds_CmdP10,
+                desc=G_DictPhrozenCmdP10["desc"],
+            )
 
-        # P8 execute Yes;"FA";
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP8["cmd"], self.Cmds_CmdP8, desc=G_DictPhrozenCmdP8["desc"]
-        )
-        # PRZ_ADC
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdToolheadAdc["cmd"],
-            self.Cmds_PhrozenAdc,
-            desc=G_DictPhrozenCmdToolheadAdc["desc"],
-        )
+            if debug_cmds_enabled:
+                # Vendor note (250805): # P11
+                self.G_PhrozenGCode.register_command("P11", self.Cmds_CmdP11, desc="P11")
+                # Vendor note (250805): # P12 loop
+                self.G_PhrozenGCode.register_command("P12", self.Cmds_CmdP12, desc="P12")
+
+            # P8 execute Yes;"FA";
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP8["cmd"], self.Cmds_CmdP8, desc=G_DictPhrozenCmdP8["desc"]
+            )
+            if debug_cmds_enabled:
+                # PRZ_ADC
+                self.G_PhrozenGCode.register_command(
+                    G_DictPhrozenCmdToolheadAdc["cmd"],
+                    self.Cmds_PhrozenAdc,
+                    desc=G_DictPhrozenCmdToolheadAdc["desc"],
+                )
         # PRZ_PAUSE
         self.G_PhrozenGCode.register_command(
             "PRZ_PAUSE", self.Cmds_PhrozenKlipperPauseScreen, desc="PHROZEN_PAUSE"
@@ -16832,10 +16819,11 @@ class Commands(Base):
         self.G_PhrozenGCode.register_command(
             "PRZ_VERSION", self.Cmds_PhrozenVersion, desc="PHROZEN_VERSION"
         )
-        # P4 device;Stop():"SP";
-        self.G_PhrozenGCode.register_command(
-            G_DictPhrozenCmdP4["cmd"], self.Cmds_CmdP4, desc=G_DictPhrozenCmdP4["desc"]
-        )
+        if ams_ui_enabled:
+            # P4 device;Stop():"SP";
+            self.G_PhrozenGCode.register_command(
+                G_DictPhrozenCmdP4["cmd"], self.Cmds_CmdP4, desc=G_DictPhrozenCmdP4["desc"]
+            )
 
         self.G_PhrozenGCode.register_command("PRZ_BM1", self.Cmds_PhrozenBM1, desc="PRZ_BM1")
         self.G_PhrozenGCode.register_command("PRZ_BM0", self.Cmds_PhrozenBM0, desc="PRZ_BM0")
@@ -16850,23 +16838,37 @@ class Commands(Base):
         # Vendor note (250115): self.G_PhrozenGCode.register_command("PRZ_RESTORE",self.Cmds_PrzATRestore,desc="PRZ_RESTORE")
         self.G_PhrozenGCode.register_command("PRZ_IDLE", self.Cmds_PrzATIdle, desc="PRZ_IDLE")
 
-        # Vendor note (250324): orcaT0 T1 T2 T3
-        self.G_PhrozenGCode.register_command("T0", self.Cmds_CmdT0, desc="T0")
-        self.G_PhrozenGCode.register_command("T1", self.Cmds_CmdT1, desc="T1")
-        self.G_PhrozenGCode.register_command("T2", self.Cmds_CmdT2, desc="T2")
-        self.G_PhrozenGCode.register_command("T3", self.Cmds_CmdT3, desc="T3")
-        self.G_PhrozenGCode.register_command("T4", self.Cmds_CmdT4, desc="T4")
-        self.G_PhrozenGCode.register_command("T5", self.Cmds_CmdT5, desc="T5")
-        self.G_PhrozenGCode.register_command("T6", self.Cmds_CmdT6, desc="T6")
-        self.G_PhrozenGCode.register_command("T7", self.Cmds_CmdT7, desc="T7")
-        self.G_PhrozenGCode.register_command("T8", self.Cmds_CmdT8, desc="T8")
-        self.G_PhrozenGCode.register_command("T9", self.Cmds_CmdT9, desc="T9")
-        self.G_PhrozenGCode.register_command("T10", self.Cmds_CmdT10, desc="T10")
-        self.G_PhrozenGCode.register_command("T11", self.Cmds_CmdT11, desc="T11")
-        self.G_PhrozenGCode.register_command("T12", self.Cmds_CmdT12, desc="T12")
-        self.G_PhrozenGCode.register_command("T13", self.Cmds_CmdT13, desc="T13")
-        self.G_PhrozenGCode.register_command("T14", self.Cmds_CmdT14, desc="T14")
-        self.G_PhrozenGCode.register_command("T15", self.Cmds_CmdT15, desc="T15")
+        if ams_ui_enabled:
+            # Vendor note (250324): orcaT0 T1 T2 T3
+            self.G_PhrozenGCode.register_command("T0", self.Cmds_CmdT0, desc="T0")
+            self.G_PhrozenGCode.register_command("T1", self.Cmds_CmdT1, desc="T1")
+            self.G_PhrozenGCode.register_command("T2", self.Cmds_CmdT2, desc="T2")
+            self.G_PhrozenGCode.register_command("T3", self.Cmds_CmdT3, desc="T3")
+            self.G_PhrozenGCode.register_command("T4", self.Cmds_CmdT4, desc="T4")
+            self.G_PhrozenGCode.register_command("T5", self.Cmds_CmdT5, desc="T5")
+            self.G_PhrozenGCode.register_command("T6", self.Cmds_CmdT6, desc="T6")
+            self.G_PhrozenGCode.register_command("T7", self.Cmds_CmdT7, desc="T7")
+            self.G_PhrozenGCode.register_command("T8", self.Cmds_CmdT8, desc="T8")
+            self.G_PhrozenGCode.register_command("T9", self.Cmds_CmdT9, desc="T9")
+            self.G_PhrozenGCode.register_command("T10", self.Cmds_CmdT10, desc="T10")
+            self.G_PhrozenGCode.register_command("T11", self.Cmds_CmdT11, desc="T11")
+            self.G_PhrozenGCode.register_command("T12", self.Cmds_CmdT12, desc="T12")
+            self.G_PhrozenGCode.register_command("T13", self.Cmds_CmdT13, desc="T13")
+            self.G_PhrozenGCode.register_command("T14", self.Cmds_CmdT14, desc="T14")
+            self.G_PhrozenGCode.register_command("T15", self.Cmds_CmdT15, desc="T15")
+        else:
+            self.kaos_log(
+                "INFO",
+                "[(cmds.python)Cmds_RegisterCmds]AMS is not attached; AMS/Tn service commands are hidden",
+                "SERIAL",
+            )
+
+        if not debug_cmds_enabled:
+            self.kaos_log(
+                "INFO",
+                "[(cmds.python)Cmds_RegisterCmds]Debug service commands are hidden (enable_debug_commands=false)",
+                "SERIAL",
+            )
 
         # [Translated vendor note] P1 S0 channelpark positionfeedprint, feedpark positionpark position; ====="RD";
         # [Translated vendor note] P1 T[n]n:1 ~32(,1 ~4)channel,(); ====="T";

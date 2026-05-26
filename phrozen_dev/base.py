@@ -266,6 +266,10 @@ AMS_WORK_MODE_FILA_RUNOUT = 3  # single-color runout mode
 # Vendor note (240115): default options
 # Defaultsdevice
 AMS_AUTO_CONNECT = False
+# DefaultsAMS presence flag in [phrozen_dev]
+AMS_ATTACHED = False
+# Defaultsdebug command visibility in UI/command lists
+AMS_ENABLE_DEBUG_COMMANDS = False
 # DefaultsfilamentXcoordinates
 AMS_FILA_CUT_X_POSITION = 313
 # Vendor note (240325): tune Y coordinate
@@ -697,7 +701,12 @@ class Base(object):
 
         # KAOS: AMS presence flag — read from [phrozen_dev] ams_attached option.
         # When False, AMS serial timers and command handlers no-op.
-        self.G_AmsAttached = self.G_PhrozenConfig.getboolean("ams_attached", False)
+        self.G_AmsAttached = self.G_PhrozenConfig.getboolean("ams_attached", AMS_ATTACHED)
+
+        # KAOS: debug command visibility flag — keeps test/service commands hidden by default.
+        self.G_EnableDebugCommands = self.G_PhrozenConfig.getboolean(
+            "enable_debug_commands", AMS_ENABLE_DEBUG_COMMANDS
+        )
 
         # printer.cfg;defaultxposition
         self.G_AMSFilaCutXPosition = self.G_PhrozenConfig.getfloat(
